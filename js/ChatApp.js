@@ -13,6 +13,12 @@ class ChatApp extends React.Component {
     };
   }
 
+  componentWillMount() {
+    window.fetch("http://ipinfo.io/json")
+      .then(r => r.json())
+      .then(r => this.setState({ipInfo: r}));
+  }
+
   onSubmitMessage(message) {
     this.setState({
       messages: this.state.messages.concat({
@@ -25,8 +31,18 @@ class ChatApp extends React.Component {
   }
 
   render() {
+    let roomName;
+
+    if (this.state.ipInfo) {
+      const ipInfo = this.state.ipInfo;
+      roomName = `${ipInfo.org} - ${ipInfo.city}, ${ipInfo.region}`;
+    } else {
+      roomName = '...';
+    }
+
     return <ChatRoom
         messages={this.state.messages}
+        roomName={roomName}
         onSubmitMessage={this.onSubmitMessage} />;
   }
 }

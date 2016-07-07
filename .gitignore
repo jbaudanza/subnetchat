@@ -1,1 +1,5 @@
 node_modules
+chat.js
+.sass-cache/
+style.css
+style.css.map

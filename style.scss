@@ -1,0 +1,49 @@
+$dark:      #2c3e50;
+$darker:    #233140;
+$highlight: #18BC9C;
+$black:     #333;
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  color: $black;
+}
+
+ul.chat-nav li {
+  list-style-type: none;
+  height: 25px;
+  line-height: 25px;
+
+  i {
+    color: $highlight;
+    width: 25px;
+    display: inline-block;
+    text-align: center;
+  }
+
+  > a {
+    display: block;
+    text-decoration: none;
+    color: $black;
+    height: 100%;
+  }
+
+  &.selected > a {
+    background-color: $dark;
+    color: white;
+  }
+}
+
+.chat-room {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.room-name {
+  height: 25px;
+  line-height: 25px;
+  background-color: #eee;
+  padding: 0 5px;
+}
