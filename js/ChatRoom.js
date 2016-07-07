@@ -49,9 +49,28 @@ class ChatRoom extends React.Component {
     this.timerId = setInterval(this.tick.bind(this), 30000);
   }
 
+  componentDidMount() {
+    this.scrollToBottom();
+  }
+
   componentWillUnmount() {
     clearInterval(this.timerId);
     delete this.timerId;
+  }
+
+  componentDidUpdate(prevProps: Object, prevState: Object) {
+    if (this.props.messages.length !== prevProps.messages.length) {
+      const ul = this.refs.messageList;
+
+      // If the user is somewhat close to the bottom of the scroll window
+      if (ul.clientHeight + ul.scrollTop + 100 >= ul.scrollHeight)
+        this.scrollToBottom()
+    }
+  }
+
+  scrollToBottom() {
+    const ul = this.refs.messageList;
+    ul.scrollTop = ul.scrollHeight - ul.clientHeight;
   }
 
   tick() {
@@ -92,7 +111,7 @@ class ChatRoom extends React.Component {
             <div className='room-name'>
               {this.props.roomName}
             </div>
-            <ul style={style.list}>
+            <ul style={style.list} ref='messageList'>
               {this.props.messages.map(e => <ChatMessage key={e.id} now={this.state.now} {...e} />)}
             </ul>
             <MessageComposer onSubmit={this.props.onSubmitMessage} />
