@@ -29,17 +29,21 @@ class ChatApp extends React.Component {
     window.fetch("http://ipinfo.io/json")
       .then(r => r.json())
       .then(r => this.setState({ipInfo: r}));
+
+    // TODO: restrict to just this subnet
+    const messages = this.props.jindo.events
+      .filter((e) => e.type === 'chat-message')
+      .scan((list, e) => list.concat(e), []);
+
+    messages.subscribe((list) => this.setState({messages: list}))
   }
 
   onSubmitMessage(message) {
-    this.setState({
-      messages: this.state.messages.concat({
-        id: this.state.messages.length,
-        timestamp: Date.now(), 
-        body: message, 
-        name: getUsername()
-      })
-    });
+    this.props.jindo.publish({
+      type: 'chat-message',
+      body: message,
+      name: getUsername()
+    })
   }
 
   render() {
@@ -58,5 +62,9 @@ class ChatApp extends React.Component {
         onSubmitMessage={this.onSubmitMessage} />;
   }
 }
+
+ChatApp.propTypes = {
+  jindo: React.PropTypes.object.isRequired
+};
 
 module.exports = ChatApp;
