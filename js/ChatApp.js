@@ -1,15 +1,27 @@
 import React from 'react'
 
 import ChatRoom from './ChatRoom';
+import * as words from './words';
+
+function pick(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+function getUsername() {
+  if (!localStorage.username) {
+    localStorage.username = pick(words.adjectives) + ' ' + pick(words.animals);
+  }
+
+  return localStorage.username;
+}
+
 
 class ChatApp extends React.Component {
   constructor(props) {
     super(props);
     this.onSubmitMessage = this.onSubmitMessage.bind(this);
     this.state = {
-      messages: [
-        {id: 0, timestamp: 0, name: 'Jon', body: 'hello'}
-      ]
+      messages: []
     };
   }
 
@@ -25,7 +37,7 @@ class ChatApp extends React.Component {
         id: this.state.messages.length,
         timestamp: Date.now(), 
         body: message, 
-        name: 'Jon'
+        name: getUsername()
       })
     });
   }
