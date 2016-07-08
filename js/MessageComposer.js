@@ -23,7 +23,7 @@ class MessageComposer extends React.Component {
     const styles = {
       wrapper: {
         display: 'flex',
-        marginTop: '5px'
+        padding: '5px'
       },
       input: {
         display: 'block',
@@ -36,6 +36,10 @@ class MessageComposer extends React.Component {
       form: {
         flex: '1',
         marginLeft: '5px'
+      },
+      avatar: {
+        width: 35,
+        height: 35
       }
     };
 

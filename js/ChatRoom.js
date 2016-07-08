@@ -81,9 +81,10 @@ class ChatRoom extends React.Component {
     const style = {
       list: {
         overflowY: 'auto',
-        padding: 0,
         margin: 0,
-        flex: 1
+        flex: 1,
+        border: '1px solid #eee',
+        padding: '5px'
       },
       wrapper: {
         height: '100%',
@@ -99,9 +100,12 @@ class ChatRoom extends React.Component {
         float: 'left',
         height: '100%',
         position: 'relative'
+      },
+      borderBottom: {
+        borderBottom: '1px solid #eee'
       }
-    }
 
+    }
 
     return (
       <div className='chat-room' style={{overflow: 'hidden'}}>
@@ -112,7 +116,15 @@ class ChatRoom extends React.Component {
               {this.props.roomName}
             </div>
             <ul style={style.list} ref='messageList'>
-              {this.props.messages.map(e => <ChatMessage key={e.id} now={this.state.now} {...e} />)}
+              {
+                this.props.messages.map((e, i) => (
+                  <ChatMessage
+                      key={e.id}
+                      style={i === (this.props.messages.length - 1) ? {} : style.borderBottom}
+                      now={this.state.now}
+                      {...e} />
+                ))
+              }
             </ul>
             <MessageComposer onSubmit={this.props.onSubmitMessage} />
           </div>
