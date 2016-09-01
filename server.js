@@ -14,6 +14,7 @@ require("babel-register")({
 const Rx = require('rxjs');
 const jindo = require('jindo/lib/server');
 const database = require('jindo/lib/server/database');
+const ip = require('ip-address');
 
 function addressForSocket(socket) {
   return (
@@ -22,8 +23,29 @@ function addressForSocket(socket) {
   );
 }
 
+function channelName(addressString) {
+  let addr;
+
+  function chomp(addr, delim) {
+    return addr.parsedAddress
+      .slice(0, addr.parsedAddress.length - 1)
+      .join(delim) + delim + '*';
+  }
+
+  addr = new ip.Address6(addressString);
+  if (addr.valid) {
+    return chomp(addr, ':');
+  }
+
+  addr = new ip.Address4(addressString);
+  if (addr.valid) {
+    return chomp(addr, ':');
+  }
+}
+
 const observables = {
   "chat-messages": function(minId, socket) {
+    console.log(channelName(addressForSocket(socket)));
     return database.streamEvents(minId, "chat-messages");
   },
 

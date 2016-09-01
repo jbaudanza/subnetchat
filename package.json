@@ -17,6 +17,7 @@
     "browserify": "^13.0.1",
     "browserify-middleware": "^7.0.0",
     "dotenv": "^2.0.0",
+    "ip-address": "^5.8.2",
     "jindo": "file:../jindo",
     "linkify": "jbaudanza/javascript-linkify",
     "morgan": "^1.7.0",
