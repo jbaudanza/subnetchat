@@ -11,12 +11,27 @@ require("babel-register")({
   presets: "es2015-node4"
 });
 
+const Rx = require('rxjs');
 const jindo = require('jindo/lib/server');
 const database = require('jindo/lib/server/database');
+
+function addressForSocket(socket) {
+  return (
+    socket.upgradeReq.headers['x-forwarded-for'] ||
+    socket.upgradeReq.connection.remoteAddress
+  );
+}
 
 const observables = {
   "chat-messages": function(minId, socket) {
     return database.streamEvents(minId, "chat-messages");
+  },
+
+  "ip-address": function(minId, socket) {
+    return Rx.Observable.of([{
+      id: minId + 1,
+      ipAddress: addressForSocket(socket)
+    }])
   }
 }
 
