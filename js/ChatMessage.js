@@ -63,7 +63,7 @@ class ChatMessage extends React.Component {
 }
 
 ChatMessage.propTypes = {
-  timestamp: React.PropTypes.number.isRequired,
+  timestamp: React.PropTypes.string.isRequired,
   body:      React.PropTypes.string.isRequired,
   name:      React.PropTypes.string.isRequired,
   style:     React.PropTypes.object

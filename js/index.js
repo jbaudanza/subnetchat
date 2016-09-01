@@ -1,10 +1,11 @@
 require('whatwg-fetch');
 
-const React = require('react');
-const ReactDOM = require('react-dom');
-const ChatApp = require('./ChatApp');
+import React from 'react';
+import ReactDOM from 'react-dom';
+import ChatApp from './ChatApp';
+import * as jindo from 'jindo/lib/client';
 
-window.main = function(el, jindo) {
+window.main = function(el) {
   ReactDOM.render(<ChatApp jindo={jindo} />, el);
 }
 

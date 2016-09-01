@@ -104,8 +104,7 @@ class ChatRoom extends React.Component {
       borderBottom: {
         borderBottom: '1px solid #eee'
       }
-
-    }
+    };
 
     return (
       <div className='chat-room' style={{overflow: 'hidden'}}>

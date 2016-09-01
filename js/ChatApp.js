@@ -31,15 +31,14 @@ class ChatApp extends React.Component {
       .then(r => this.setState({ipInfo: r}));
 
     // TODO: restrict to just this subnet
-    const messages = this.props.jindo.events
-      .filter((e) => e.type === 'chat-message')
+    const messages = this.props.jindo.stream('chat-messages')
       .scan((list, e) => list.concat(e), []);
 
     messages.subscribe((list) => this.setState({messages: list}))
   }
 
   onSubmitMessage(message) {
-    this.props.jindo.publish({
+    this.props.jindo.publish('chat-messages', {
       type: 'chat-message',
       body: message,
       name: getUsername()
