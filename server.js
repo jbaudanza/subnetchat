@@ -12,9 +12,35 @@ require("babel-register")({
 });
 
 const Rx = require('rxjs');
+const ip = require('ip-address');
 const jindo = require('jindo/lib/server');
 const database = require('jindo/lib/server/database');
-const ip = require('ip-address');
+const sessions = require('jindo/lib/server/presence').sessions;
+const _ = require('lodash');
+
+const onlineSessions = sessions(
+    database.observable('connection-events'),
+    database.observable('process-lifecycle')
+);
+
+
+const joinEvents = database.observable('chat-messages')
+  .map((batch) => batch.filter((o) => o.type === 'chat-join'))
+  .scan((list, item) => list.concat(item), [])
+
+
+// TODO: This is rescanning all the events to look for join events. Is there
+// someway to embed this into the SQL query?
+const presence = Rx.Observable.combineLatest(joinEvents, onlineSessions, reduceToPresenceList);
+
+
+function reduceToPresenceList(joinEvents, sessionIds) {
+  return joinEvents
+      .filter((e) => _.includes(sessionIds, e.sessionId))
+      .map(e => e.name);
+}
+
+
 
 function addressForSocket(socket) {
   return (
@@ -43,13 +69,23 @@ function channelName(addressString) {
   }
 }
 
+
+// TODO:
+//  - rethink how bulk messages are sent
+//  - Is is right to require that all events are Objects (not strings or numbers)
+//  - Rethink the minId concept.
 const observables = {
-  "chat-messages": function(minId, socket) {
-    console.log(channelName(addressForSocket(socket)));
-    return database.streamEvents(minId, "chat-messages");
+  "chat-messages"(minId) {
+    return database.observable("chat-messages", minId);
   },
 
-  "ip-address": function(minId, socket) {
+  // LEFT OFF HERE: This seems to work, but I don't think the session stream
+  // is working properly.
+  "presence"(minId) {
+    return presence.map(value => [{value: value, id: minId + 1}]);
+  },
+
+  "ip-address"(minId, socket) {
     return Rx.Observable.of([{
       id: minId + 1,
       ipAddress: addressForSocket(socket)

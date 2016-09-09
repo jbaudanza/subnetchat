@@ -31,8 +31,7 @@ function ChatNav(props) {
   return (
     <ul className='chat-nav' style={style}>
       <ChatNavItem selected type="channel">192.168.1.*</ChatNavItem>
-      <ChatNavItem type="user">Jonathan B</ChatNavItem>
-      <ChatNavItem type="user">Biggie S</ChatNavItem>
+      {props.presence.map((name) => <ChatNavItem type="user">{name}</ChatNavItem>)}
     </ul>
   );
 }
@@ -108,7 +107,7 @@ class ChatRoom extends React.Component {
 
     return (
       <div className='chat-room' style={{overflow: 'hidden'}}>
-        <ChatNav style={style.leftColumn} />
+        <ChatNav style={style.leftColumn} presence={this.props.presence} />
         <div style={style.rightColumn}>
           <div style={style.wrapper}>
             <div className='room-name'>
@@ -135,6 +134,7 @@ class ChatRoom extends React.Component {
 
 ChatRoom.propTypes = {
   messages:         React.PropTypes.array.isRequired,
+  presence:         React.PropTypes.array.isRequired,
   onSubmitMessage:  React.PropTypes.func.isRequired
 };
 

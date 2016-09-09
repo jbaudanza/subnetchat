@@ -31,10 +31,20 @@ class ChatApp extends React.Component {
       .then(r => this.setState({ipInfo: r}));
 
     // TODO: restrict to just this subnet
-    const messages = this.props.jindo.stream('chat-messages')
+    const messages = this.props.jindo.observable('chat-messages')
+      .filter((msg) => msg.type === 'chat-message')
       .scan((list, e) => list.concat(e), []);
 
-    messages.subscribe((list) => this.setState({messages: list}))
+    const presence = this.props.jindo.observable('presence');
+
+    messages.subscribe((list) => this.setState({messages: list}));
+
+    presence.subscribe((value) => this.setState({presence: value}));
+
+    this.props.jindo.publish('chat-messages', {
+      type: 'chat-join',
+      name: getUsername()
+    });
   }
 
   onSubmitMessage(message) {
@@ -42,7 +52,7 @@ class ChatApp extends React.Component {
       type: 'chat-message',
       body: message,
       name: getUsername()
-    })
+    });
   }
 
   render() {
@@ -55,8 +65,16 @@ class ChatApp extends React.Component {
       roomName = '...';
     }
 
+    let presence;
+    if (this.state.presence) {
+      presence = this.state.presence.value;
+    } else {
+      presence = [];
+    }
+
     return <ChatRoom
         messages={this.state.messages}
+        presence={presence}
         roomName={roomName}
         onSubmitMessage={this.onSubmitMessage} />;
   }
