@@ -16,13 +16,41 @@ function getUsername() {
 }
 
 
+function subscribeToComponent(Component, observables) {
+  return class ReactObserver extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {};
+    }
+
+    componentWillMount() {
+      this.unsubs = [];
+      Object.keys(observables).forEach((key) => {
+        this.unsubs.push(
+          observables[key].subscribe((v) => this.setState({[key]: v}))
+        );
+      });
+
+    }
+
+    componentWillUnmount() {
+      this.unsubs.forEach(function(sub) {
+        sub.unsubscribe();
+      })
+    }
+
+    render() {
+      return <Component {...this.state} {...this.props} />;
+    }
+  }
+}
+
+
 class ChatApp extends React.Component {
   constructor(props) {
     super(props);
     this.onSubmitMessage = this.onSubmitMessage.bind(this);
-    this.state = {
-      messages: []
-    };
+    this.state = {};
   }
 
   componentWillMount() {
@@ -33,13 +61,18 @@ class ChatApp extends React.Component {
     // TODO: restrict to just this subnet
     const messages = this.props.jindo.observable('chat-messages')
       .filter((msg) => msg.type === 'chat-message')
-      .scan((list, e) => list.concat(e), []);
+      .scan((list, e) => list.concat(e), [])
+      .startWith([]);
 
-    const presence = this.props.jindo.observable('presence');
+    const presence = this.props.jindo
+        .observable('presence')
+        .map(v => v.value)
+        .startWith([]);
 
-    messages.subscribe((list) => this.setState({messages: list}));
-
-    presence.subscribe((value) => this.setState({presence: value}));
+    this.Observer = subscribeToComponent(ChatRoom, {
+      messages: messages,
+      presence: presence
+    })
 
     this.props.jindo.publish('chat-messages', {
       type: 'chat-join',
@@ -65,16 +98,7 @@ class ChatApp extends React.Component {
       roomName = '...';
     }
 
-    let presence;
-    if (this.state.presence) {
-      presence = this.state.presence.value;
-    } else {
-      presence = [];
-    }
-
-    return <ChatRoom
-        messages={this.state.messages}
-        presence={presence}
+    return <this.Observer
         roomName={roomName}
         onSubmitMessage={this.onSubmitMessage} />;
   }
