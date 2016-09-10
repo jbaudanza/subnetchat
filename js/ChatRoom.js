@@ -1,7 +1,7 @@
 import React from 'react';
 
-import ChatMessage from './ChatMessage';
 import MessageComposer from './MessageComposer';
+import MessageList from './MessageList';
 
 
 function ChatNavItem(props) {
@@ -31,9 +31,48 @@ function ChatNav(props) {
   return (
     <ul className='chat-nav' style={style}>
       <ChatNavItem selected type="channel">192.168.1.*</ChatNavItem>
-      {props.presence.map((name) => <ChatNavItem type="user">{name}</ChatNavItem>)}
+      {props.presence.map((name, i) => <ChatNavItem key={i} type="user">{name}</ChatNavItem>)}
     </ul>
   );
+}
+
+
+function Disconnected(props) {
+  const seconds = Math.floor((props.reconnectingAt - props.now) /1000);
+
+  return (
+    <div>
+      You are disconnected. Reconnecting in {seconds} seconds.
+    </div>
+  );
+}
+
+
+function createTickingComponent(Component, interval) {
+  return class TickingComponent extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {};
+    }
+
+    componentWillMount() {
+      this.tick();
+      this.timerId = setInterval(this.tick.bind(this), interval);
+    }
+
+    componentWillUnmount() {
+      clearInterval(this.timerId);
+      delete this.timerId;
+    }
+
+    tick() {
+      this.setState({now: new Date()});
+    }
+
+    render() {
+      return <Component now={this.state.now} {...this.props} />;
+    }
+  };
 }
 
 
@@ -44,47 +83,16 @@ class ChatRoom extends React.Component {
   }
 
   componentWillMount() {
-    this.tick();
-    this.timerId = setInterval(this.tick.bind(this), 30000);
-  }
-
-  componentDidMount() {
-    this.scrollToBottom();
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.timerId);
-    delete this.timerId;
-  }
-
-  componentDidUpdate(prevProps: Object, prevState: Object) {
-    if (this.props.messages.length !== prevProps.messages.length) {
-      const ul = this.refs.messageList;
-
-      // If the user is somewhat close to the bottom of the scroll window
-      if (ul.clientHeight + ul.scrollTop + 100 >= ul.scrollHeight)
-        this.scrollToBottom()
-    }
-  }
-
-  scrollToBottom() {
-    const ul = this.refs.messageList;
-    ul.scrollTop = ul.scrollHeight - ul.clientHeight;
-  }
-
-  tick() {
-    this.setState({now: new Date()});
+    this.MessageList = createTickingComponent(MessageList, 30000);
+    this.Disconnected = createTickingComponent(Disconnected, 1000);
   }
 
   render() {
+    if (!this.props.connected) {
+      return <this.Disconnected reconnectingAt={this.props.reconnectingAt} />;
+    }
+
     const style = {
-      list: {
-        overflowY: 'auto',
-        margin: 0,
-        flex: 1,
-        border: '1px solid #eee',
-        padding: '5px'
-      },
       wrapper: {
         height: '100%',
         display: 'flex',
@@ -99,9 +107,6 @@ class ChatRoom extends React.Component {
         float: 'left',
         height: '100%',
         position: 'relative'
-      },
-      borderBottom: {
-        borderBottom: '1px solid #eee'
       }
     };
 
@@ -113,17 +118,7 @@ class ChatRoom extends React.Component {
             <div className='room-name'>
               {this.props.roomName}
             </div>
-            <ul style={style.list} ref='messageList'>
-              {
-                this.props.messages.map((e, i) => (
-                  <ChatMessage
-                      key={e.id}
-                      style={i === (this.props.messages.length - 1) ? {} : style.borderBottom}
-                      now={this.state.now}
-                      {...e} />
-                ))
-              }
-            </ul>
+            <this.MessageList messages={this.props.messages} />
             <MessageComposer onSubmit={this.props.onSubmitMessage} />
           </div>
         </div>  
@@ -133,6 +128,7 @@ class ChatRoom extends React.Component {
 }
 
 ChatRoom.propTypes = {
+  connected:        React.PropTypes.bool.isRequired,
   messages:         React.PropTypes.array.isRequired,
   presence:         React.PropTypes.array.isRequired,
   onSubmitMessage:  React.PropTypes.func.isRequired

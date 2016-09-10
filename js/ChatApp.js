@@ -71,7 +71,9 @@ class ChatApp extends React.Component {
 
     this.Observer = subscribeToComponent(ChatRoom, {
       messages: messages,
-      presence: presence
+      presence: presence,
+      connected: this.props.jindo.connected,
+      reconnectingAt: this.props.jindo.reconnectingAt
     })
 
     this.props.jindo.publish('chat-messages', {
@@ -83,7 +85,7 @@ class ChatApp extends React.Component {
   onSubmitMessage(message) {
     this.props.jindo.publish('chat-messages', {
       type: 'chat-message',
-      body: message,
+      body: message, 
       name: getUsername()
     });
   }
