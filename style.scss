@@ -35,36 +35,48 @@ ul.chat-nav li {
 
 header {
   background-color: $dark;
-  color: white;
-  height: 50px;
-  line-height: 50px;
+  padding: 20px;
+
+  .logo, .tag-line {
+    display: block;
+  }
 
   .logo {
-    display: inline-block;
-    width: 229px;
-    text-align: center;
+    color: white;
+    padding-bottom: 4px;
+  }
+  .tag-line {
+    color: #969696;
+    font-size: 75%;
   }
 }
 
 .chat-room {
   position: fixed;
-  top: 50px;
+  top: 125px;
   bottom: 0;
   left: 0;
   right: 0;
 }
 
 .channel-header {
-  height: 75px;
-  line-height: 25px;
-  background-color: #eee;
-  padding: 10px 15px;
+  background-color: #D8D8D8;
+  color: $black;
+  padding: 0 20px;
+  overflow: hidden;
 
-  .channel-name {
+  .chatting-with {
+    font-size: 75%;
     display: block;
+    color: #969696;
+    margin-top: 7px;
+    margin-bottom: 2px;
+  }
+  .channel-name {
     font-weight: bold;
+    display: block;
   }
   .channel-description {
-    display: block;
+    line-height: 50px;
   }
 }

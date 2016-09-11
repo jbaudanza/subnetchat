@@ -119,20 +119,23 @@ class ChatRoom extends React.Component {
             The simplest chatroom for your office, school, or private subnet.
           </span>
         </header>
+        <div className='channel-header'>
+          <div style={style.leftColumn}>
+            <span className='chatting-with'>Chatting with</span>
+            <span className='channel-name'>
+              {this.props.channelName}
+            </span>
+          </div>
+          <span className='channel-description' style={style.rightColumn}>
+            {this.props.roomName}
+          </span>
+        </div>
         <div className='chat-room' style={{overflow: 'hidden'}}>
           <ChatNav
               style={style.leftColumn}
               presence={this.props.presence} />
           <div style={style.rightColumn}>
             <div style={style.wrapper}>
-              <div className='channel-header'>
-                <span className='channel-name'>
-                  {this.props.channelName}
-                </span>
-                <span className='channel-description'>
-                  {this.props.roomName}
-                </span>
-              </div>
               <this.MessageList messages={this.props.messages} />
               <MessageComposer onSubmit={this.props.onSubmitMessage} />
             </div>
