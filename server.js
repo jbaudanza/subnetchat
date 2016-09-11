@@ -12,11 +12,11 @@ require("babel-register")({
 });
 
 const Rx = require('rxjs');
-const ip = require('ip-address');
 const jindo = require('jindo/lib/server');
 const database = require('jindo/lib/server/database');
 const sessions = require('jindo/lib/server/presence').sessions;
 const _ = require('lodash');
+const channelName = require('./js/channelName');
 
 const onlineSessions = sessions(
     database.observable('connection-events'),
@@ -49,27 +49,6 @@ function addressForSocket(socket) {
   );
 }
 
-function channelName(addressString) {
-  let addr;
-
-  function chomp(addr, delim) {
-    return addr.parsedAddress
-      .slice(0, addr.parsedAddress.length - 1)
-      .join(delim) + delim + '*';
-  }
-
-  addr = new ip.Address6(addressString);
-  if (addr.valid) {
-    return chomp(addr, ':');
-  }
-
-  addr = new ip.Address4(addressString);
-  if (addr.valid) {
-    return chomp(addr, ':');
-  }
-}
-
-
 // TODO:
 //  - rethink how bulk messages are sent
 //  - Is is right to require that all events are Objects (not strings or numbers)
@@ -83,6 +62,10 @@ const observables = {
   // is working properly.
   "presence"(minId) {
     return presence.map(value => [{value: value, id: minId + 1}]);
+  },
+
+  "channel-name"(minId) {
+    return Rx.Observable.of([channelName])
   },
 
   "ip-address"(minId, socket) {

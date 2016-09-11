@@ -2,6 +2,7 @@ import React from 'react'
 
 import ChatRoom from './ChatRoom';
 import * as words from './words';
+import channelNameFromAddress from './channelName';
 
 function pick(array) {
   return array[Math.floor(Math.random() * array.length)];
@@ -69,11 +70,15 @@ class ChatApp extends React.Component {
         .map(v => v.value)
         .startWith([]);
 
+    const channelName = this.props.jindo.observable('ip-address')
+        .map(v => channelNameFromAddress(v.ipAddress));
+
     this.Observer = subscribeToComponent(ChatRoom, {
       messages: messages,
       presence: presence,
       connected: this.props.jindo.connected,
-      reconnectingAt: this.props.jindo.reconnectingAt
+      reconnectingAt: this.props.jindo.reconnectingAt,
+      channelName: channelName
     })
 
     this.props.jindo.publish('chat-messages', {

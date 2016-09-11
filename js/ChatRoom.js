@@ -30,7 +30,6 @@ function ChatNav(props) {
   const style = Object.assign({padding: 0, margin: 0}, props.style)
   return (
     <ul className='chat-nav' style={style}>
-      <ChatNavItem selected type="channel">192.168.1.*</ChatNavItem>
       {props.presence.map((name, i) => <ChatNavItem key={i} type="user">{name}</ChatNavItem>)}
     </ul>
   );
@@ -111,17 +110,34 @@ class ChatRoom extends React.Component {
     };
 
     return (
-      <div className='chat-room' style={{overflow: 'hidden'}}>
-        <ChatNav style={style.leftColumn} presence={this.props.presence} />
-        <div style={style.rightColumn}>
-          <div style={style.wrapper}>
-            <div className='room-name'>
-              {this.props.roomName}
+      <div>
+        <header>
+          <span className='logo'>
+            subnetchat.com
+          </span>
+          <span className='tag-line'>
+            The simplest chatroom for your office, school, or private subnet.
+          </span>
+        </header>
+        <div className='chat-room' style={{overflow: 'hidden'}}>
+          <ChatNav
+              style={style.leftColumn}
+              presence={this.props.presence} />
+          <div style={style.rightColumn}>
+            <div style={style.wrapper}>
+              <div className='channel-header'>
+                <span className='channel-name'>
+                  {this.props.channelName}
+                </span>
+                <span className='channel-description'>
+                  {this.props.roomName}
+                </span>
+              </div>
+              <this.MessageList messages={this.props.messages} />
+              <MessageComposer onSubmit={this.props.onSubmitMessage} />
             </div>
-            <this.MessageList messages={this.props.messages} />
-            <MessageComposer onSubmit={this.props.onSubmitMessage} />
           </div>
-        </div>  
+        </div>
       </div>
     );
   }

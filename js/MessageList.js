@@ -51,5 +51,5 @@ export default class MessageList extends React.Component {
 
 MessageList.propTypes = {
   messages: React.PropTypes.array.isRequired,
-  now:      React.PropTypes.object.isRequired
+  now:      React.PropTypes.instanceOf(Date).isRequired
 };
