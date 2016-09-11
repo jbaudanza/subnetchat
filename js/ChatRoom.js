@@ -99,10 +99,13 @@ class ChatRoom extends React.Component {
       },
       leftColumn: {
         width: '20%',
-        float: 'left'
+        boxSizing: 'border-box',
+        float: 'left',
+        height: '100%'
       },
       rightColumn: {
         width: '80%',
+        boxSizing: 'border-box',
         float: 'left',
         height: '100%',
         position: 'relative'
@@ -126,14 +129,19 @@ class ChatRoom extends React.Component {
               {this.props.channelName}
             </span>
           </div>
-          <span className='channel-description' style={style.rightColumn}>
-            {this.props.roomName}
-          </span>
+          <div style={style.rightColumn}>
+            <span className='channel-description'>
+              {this.props.channelDescription}
+            </span>
+            <span className='channel-location'>
+              {this.props.channelLocation}
+            </span>
+          </div>
         </div>
         <div className='chat-room' style={{overflow: 'hidden'}}>
-          <ChatNav
-              style={style.leftColumn}
-              presence={this.props.presence} />
+          <div style={style.leftColumn}>
+            <ChatNav presence={this.props.presence} />
+          </div>
           <div style={style.rightColumn}>
             <div style={style.wrapper}>
               <this.MessageList messages={this.props.messages} />

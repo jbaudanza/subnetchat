@@ -96,18 +96,15 @@ class ChatApp extends React.Component {
   }
 
   render() {
-    let roomName;
+    const extraProps = { onSubmitMessage: this.onSubmitMessage };
 
     if (this.state.ipInfo) {
       const ipInfo = this.state.ipInfo;
-      roomName = `${ipInfo.org} - ${ipInfo.city}, ${ipInfo.region}`;
-    } else {
-      roomName = '...';
+      extraProps.channelDescription = ipInfo.org;
+      extraProps.channelLocation = `${ipInfo.city}, ${ipInfo.region}`
     }
 
-    return <this.Observer
-        roomName={roomName}
-        onSubmitMessage={this.onSubmitMessage} />;
+    return <this.Observer {...extraProps} />;
   }
 }
 

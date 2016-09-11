@@ -62,21 +62,26 @@ header {
 .channel-header {
   background-color: #D8D8D8;
   color: $black;
-  padding: 0 20px;
   overflow: hidden;
+  padding: 9.5px 0;
+
+  > div:first-child {
+    padding: 0 20px;
+  }
 
   .chatting-with {
     font-size: 75%;
     display: block;
-    color: #969696;
-    margin-top: 7px;
-    margin-bottom: 2px;
   }
   .channel-name {
     font-weight: bold;
     display: block;
   }
   .channel-description {
-    line-height: 50px;
+    display: block;
+  }
+  .channel-location {
+    display: block;
+    font-size: 75%;
   }
 }
