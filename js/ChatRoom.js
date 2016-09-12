@@ -115,11 +115,11 @@ class ChatRoom extends React.Component {
     return (
       <div>
         <header>
-          <span className='logo'>
+          <a href="https://www.subnetchat.com/" className='logo'>
             subnetchat.com
-          </span>
+          </a>
           <span className='tag-line'>
-            The simplest chatroom for your office, school, or private subnet.
+            A private chatroom for your office, school, or local subnet.
           </span>
         </header>
         <div className='channel-header'>
@@ -129,7 +129,7 @@ class ChatRoom extends React.Component {
               {this.props.channelName}
             </span>
           </div>
-          <div style={style.rightColumn}>
+          <div style={Object.assign({paddingLeft: '5px'}, style.rightColumn)}>
             <span className='channel-description'>
               {this.props.channelDescription}
             </span>

@@ -44,6 +44,7 @@ header {
   .logo {
     color: white;
     padding-bottom: 4px;
+    text-decoration: none;
   }
   .tag-line {
     color: #969696;
@@ -64,6 +65,7 @@ header {
   color: $black;
   overflow: hidden;
   padding: 9.5px 0;
+  border-bottom: 1px solid #ccc;
 
   > div:first-child {
     padding: 0 20px;

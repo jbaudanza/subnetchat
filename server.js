@@ -24,7 +24,7 @@ const onlineSessions = sessions(
 );
 
 
-const joinEvents = database.observable('chat-messages')
+const joinEvents = database.observable('chat-messages', 0, true)
   .map((batch) => batch.filter((o) => o.type === 'chat-join'))
   .scan((list, item) => list.concat(item), [])
 
@@ -32,7 +32,6 @@ const joinEvents = database.observable('chat-messages')
 // TODO: This is rescanning all the events to look for join events. Is there
 // someway to embed this into the SQL query?
 const presence = Rx.Observable.combineLatest(joinEvents, onlineSessions, reduceToPresenceList);
-
 
 function reduceToPresenceList(joinEvents, sessionIds) {
   return joinEvents
@@ -58,10 +57,10 @@ const observables = {
     return database.observable("chat-messages", minId);
   },
 
-  // LEFT OFF HERE: This seems to work, but I don't think the session stream
-  // is working properly.
-  "presence"(minId) {
-    return presence.map(value => [{value: value, id: minId + 1}]);
+  "presence"(minId, socket, sessionId) {
+    // TODO: The observables server should handle this
+    let count = 0;
+    return presence.map(value => [{value: value, id: minId + ++count}])
   },
 
   "channel-name"(minId) {
@@ -69,8 +68,9 @@ const observables = {
   },
 
   "ip-address"(minId, socket) {
+    let count = 0;
     return Rx.Observable.of([{
-      id: minId + 1,
+      id: minId + ++count,
       ipAddress: addressForSocket(socket)
     }])
   }
