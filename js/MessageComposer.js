@@ -36,16 +36,12 @@ class MessageComposer extends React.Component {
       form: {
         flex: '1',
         marginLeft: '5px'
-      },
-      avatar: {
-        width: 35,
-        height: 35
       }
     };
 
     return (
       <div style={styles.wrapper} className='message-composer'>
-        <img className='avatar' src={''} style={styles.avatar} />
+        {this.props.avatar}
         <form style={styles.form} onSubmit={this.onSubmit}>
           <input style={styles.input} type="text" onChange={this.onChange} value={this.state.message} />
           <input style={styles.sendButton} type="submit" value="send" disabled={!this.state.message.trim()} />

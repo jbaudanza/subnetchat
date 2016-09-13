@@ -75,6 +75,37 @@ function createTickingComponent(Component, interval) {
 }
 
 
+function Avatar(props) {
+  const icons = [
+    71,   // sunglasses
+    73,   // eyes
+    83,   // coffee
+    87,   // panda
+    109,  // skateboard
+    110,  // pin
+    121,  // rose
+    114   // lightning
+  ];
+
+  const colors = [
+    '#913CCD', // purple
+    '#F05F74', // red
+    '#F76E3C', // orange
+    '#F7D842', // yellow
+    '#2DA8C2', // light blue
+    '#98CB4A', // green
+    '#839098', // grey
+    '#5481E6'  // dark-blue
+  ];
+
+  return (
+    <div className='avatar' style={{backgroundColor: colors[props.colorIndex]}}>
+      {String.fromCharCode(icons[props.iconIndex])}
+    </div>
+  )
+}
+
+
 class ChatRoom extends React.Component {
   constructor(props) {
     super(props);
@@ -152,7 +183,7 @@ class ChatRoom extends React.Component {
           <div style={style.rightColumn}>
             <div style={style.wrapper}>
               <this.MessageList messages={this.props.messages} />
-              <MessageComposer onSubmit={this.props.onSubmitMessage} />
+              <MessageComposer onSubmit={this.props.onSubmitMessage} avatar={<Avatar iconIndex={2} colorIndex={3} />} />
             </div>
           </div>
         </div>

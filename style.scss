@@ -12,6 +12,11 @@ body {
   color: $black;
 }
 
+@font-face {
+  font-family: KoolDing;
+  src: url(koolding.ttf);
+}
+
 @mixin buttonize($background-color) {
   display: inline-block;
   border-radius: 7px;
@@ -43,6 +48,18 @@ body {
   margin-top: 5px;
   margin-left: 4px;
   @include buttonize($highlight);
+}
+
+.avatar {
+  font-family: KoolDing;
+  color: white;
+  text-align: center;
+  height: 35px;
+  width: 35px;
+  line-height: 35px;
+  font-size: 150%;
+  padding-top: 2px;
+  box-sizing: border-box;
 }
 
 ul.chat-nav li {
