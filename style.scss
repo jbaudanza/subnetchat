@@ -3,7 +3,7 @@ $darker:    #233140;
 $highlight: #18BC9C;
 $black:     #333;
 
-@import "bourbon";
+@import 'overlay';
 
 $base-font-family: 'Open Sans', sans-serif;
 
@@ -51,15 +51,18 @@ body {
 }
 
 .avatar {
-  font-family: KoolDing;
   color: white;
   text-align: center;
   height: 35px;
   width: 35px;
   line-height: 35px;
-  font-size: 150%;
   padding-top: 2px;
   box-sizing: border-box;
+}
+
+.avatar-icon {
+  font-size: 150%;
+  font-family: KoolDing;
 }
 
 ul.chat-nav li {
@@ -152,5 +155,53 @@ header {
   .channel-location {
     display: block;
     font-size: 75%;
+  }
+}
+
+.box-picker {
+  overflow: hidden;
+
+  > a {
+    float: left;
+    display: block;
+    width: 35px;
+    height: 35px;
+    box-sizing: border-box;
+    margin: 2px;
+
+    color: black;
+    text-decoration: none;
+    text-align: center;
+
+    &.active {
+      border: 2px solid $black;
+    }
+  }
+}
+
+.icon-picker > a {
+  border: 1px solid #eee;
+  padding-top: 3px;
+}
+
+.identity-selector {
+  .row, .box-picker {
+    margin-bottom: 10px;
+  }
+
+  .row {
+    overflow: hidden;
+    padding: 2px;
+
+    .avatar, input {
+      float: left
+    }
+    input {
+      box-sizing: border-box;
+      height: 35px;
+      width: 270px;
+      font-size: 125%;
+      margin-left: 4px;
+    }
   }
 }

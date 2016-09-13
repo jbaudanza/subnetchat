@@ -1,8 +1,12 @@
 import React from 'react'
+import {bindAll} from 'lodash';
 
 import ChatRoom from './ChatRoom';
 import * as words from './words';
 import channelNameFromAddress from './channelName';
+import IdentitySelector from './IdentitySelector'
+import Overlay from './Overlay';
+
 
 
 function randomIndex(ceil) {
@@ -26,8 +30,8 @@ function getFromLocalstorage(key, generator) {
 function getIdentity() {
   return {
     name: getFromLocalstorage('username', () => pick(words.adjectives) + ' ' + pick(words.animals)),
-    color: getFromLocalstorage('color', () => randomIndex(8)),
-    icon: getFromLocalstorage('icon', () => randomIndex(8))
+    colorIndex: parseInt(getFromLocalstorage('color', () => randomIndex(8))),
+    iconIndex: parseInt(getFromLocalstorage('icon', () => randomIndex(8)))
   };
 }
 
@@ -64,8 +68,20 @@ function subscribeToComponent(Component, observables) {
 class ChatApp extends React.Component {
   constructor(props) {
     super(props);
-    this.onSubmitMessage = this.onSubmitMessage.bind(this);
-    this.state = {};
+
+    bindAll(this, 'onSubmitMessage', 'showOverlay', 'hideOverlay', 'setIdentity');
+
+    this.state = {
+      showOverlay: false
+    };
+  }
+
+  setIdentity(identity) {
+    this.hideOverlay();
+    this.setState({identity: identity});
+    // TODO
+    // - store in localStorage
+    // - send an event to the server
   }
 
   componentWillMount() {
@@ -109,10 +125,19 @@ class ChatApp extends React.Component {
     }, getIdentity()));
   }
 
+  showOverlay() {
+    this.setState({showOverlay: true});
+  }
+
+  hideOverlay() {
+    this.setState({showOverlay: false});
+  }
+
   render() {
     const extraProps = {
       onSubmitMessage: this.onSubmitMessage,
-      identity: this.state.identity
+      identity: this.state.identity,
+      onChangeName: this.showOverlay
     };
 
     if (this.state.ipInfo) {
@@ -121,7 +146,24 @@ class ChatApp extends React.Component {
       extraProps.channelLocation = `${ipInfo.city}, ${ipInfo.region}`
     }
 
-    return <this.Observer {...extraProps} />;
+    let overlay;
+    if (this.state.showOverlay) {
+      overlay = (
+        <Overlay onClose={this.hideOverlay}>
+          <IdentitySelector
+              {...this.state.identity}
+              onClose={this.hideOverlay}
+              onSubmit={this.setIdentity} />
+        </Overlay>
+      );
+    }
+
+    return (
+      <div>
+        {overlay}
+        <this.Observer {...extraProps} />
+      </div>
+    );
   }
 }
 

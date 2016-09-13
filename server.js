@@ -8,7 +8,8 @@
  */
 
 require("babel-register")({
-  presets: "es2015-node4"
+  presets: "es2015-node4",
+  plugins: 'transform-flow-strip-types'
 });
 
 const Rx = require('rxjs');
@@ -79,7 +80,7 @@ const observables = {
 const app = jindo.start(observables);
 
 const browserifyOptions = {
-  transform: [['babelify', {presets: ["react", 'es2015']}]]
+  transform: [['babelify', {presets: ["react", 'es2015'], plugins: ['transform-flow-strip-types']}]]
 };
 
 if (app.settings.env === 'development') {

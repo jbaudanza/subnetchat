@@ -2,6 +2,9 @@ import React from 'react';
 
 import MessageComposer from './MessageComposer';
 import MessageList from './MessageList';
+import FontAwesome from './FontAwesome';
+import Avatar from './Avatar';
+import Link from './Link';
 
 
 function ChatNavItem(props) {
@@ -9,7 +12,7 @@ function ChatNavItem(props) {
   let className;
 
   if (props.type === 'user') {
-    icon = <i className="fa fa-user"></i>;
+    icon = <FontAwesome icon='user' />
   } else {
     icon = <i>#</i>;
   }
@@ -75,37 +78,6 @@ function createTickingComponent(Component, interval) {
 }
 
 
-function Avatar(props) {
-  const icons = [
-    71,   // sunglasses
-    73,   // eyes
-    83,   // coffee
-    87,   // panda
-    109,  // skateboard
-    110,  // pin
-    121,  // rose
-    114   // lightning
-  ];
-
-  const colors = [
-    '#913CCD', // purple
-    '#F05F74', // red
-    '#F76E3C', // orange
-    '#F7D842', // yellow
-    '#2DA8C2', // light blue
-    '#98CB4A', // green
-    '#839098', // grey
-    '#5481E6'  // dark-blue
-  ];
-
-  return (
-    <div className='avatar' style={{backgroundColor: colors[props.colorIndex]}}>
-      {String.fromCharCode(icons[props.iconIndex])}
-    </div>
-  );
-}
-
-
 class ChatRoom extends React.Component {
   constructor(props) {
     super(props);
@@ -153,9 +125,7 @@ class ChatRoom extends React.Component {
       })
     );
 
-    const avatar = <Avatar
-        iconIndex={this.props.identity.icon}
-        colorIndex={this.props.identity.color} />
+    const avatar = <Avatar {...this.props.identity} />
 
     return (
       <div>
@@ -179,7 +149,7 @@ class ChatRoom extends React.Component {
               {this.props.channelDescription}
             </span>
             <span className='channel-location'>
-              <i className="fa fa-map-marker" /> {this.props.channelLocation}
+              <FontAwesome icon='map-marker' /> {this.props.channelLocation}
             </span>
           </div>
         </div>
@@ -188,9 +158,9 @@ class ChatRoom extends React.Component {
             <div style={style.wrapper}>
               <ChatNav presence={this.props.presence} style={{display: 'flex', flex: 1}}/>
               <div style={{display: 'flex', height: '57px'}}>
-                <a href="#" className='change-name-button'>
+                <Link className='change-name-button' onClick={this.props.onChangeName}>
                   Change your name or avatar
-                </a>
+                </Link>
               </div>
             </div>
           </div>
