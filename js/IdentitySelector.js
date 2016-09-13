@@ -65,29 +65,34 @@ class IdentitySelector extends React.Component {
   render() {
     return (
       <form onSubmit={this.onSubmit} className='identity-selector'>
-        <h2>Change your name, icon or color</h2>
+        <label htmlFor='change-name'>Your name</label>
+        <input id='change-name' type="text" value={this.state.name} onChange={this.onChangeName} />
 
-        <div className='row'>
+        <label htmlFor='change-avatar'>Your avatar</label>
+        <div className='picker-wrapper' id='change-avatar'>
           <Avatar iconIndex={this.state.iconIndex} colorIndex={this.state.colorIndex} />
-          <input type="text" value={this.state.name} onChange={this.onChangeName} />
+          <div className='options'>
+            <BoxPicker selectedIndex={this.state.colorIndex} onChange={this.setColorIndex}>
+            {
+              colors.map((color, i) => (
+                <div key={i} style={{backgroundColor: color, height: '100%', width: '100%'}}>
+                </div>
+              ))
+            }
+            </BoxPicker>
+
+            <BoxPicker className='icon-picker' selectedIndex={this.state.iconIndex} onChange={this.setIconIndex}>
+              {icons.map((icon, i) => React.cloneElement(icon, {key: i}))}
+            </BoxPicker>
+          </div>
+
         </div>
 
-        <BoxPicker selectedIndex={this.state.colorIndex} onChange={this.setColorIndex}>
-        {
-          colors.map((color, i) => (
-            <div key={i} style={{backgroundColor: color, height: '100%', width: '100%'}}>
-            </div>
-          ))
-        }
-        </BoxPicker>
+        <div className='actions'>
+          <Link onClick={this.props.onClose}>Nevermind</Link>
 
-        <BoxPicker className='icon-picker' selectedIndex={this.state.iconIndex} onChange={this.setIconIndex}>
-          {icons.map((icon, i) => React.cloneElement(icon, {key: i}))}
-        </BoxPicker>
-
-        <Link onClick={this.props.onClose}>Nevermind</Link>
-
-        <input type="submit" />
+          <input type="submit" />
+        </div>
       </form>
     );
   }

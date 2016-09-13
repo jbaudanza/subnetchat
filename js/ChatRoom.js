@@ -117,7 +117,7 @@ class ChatRoom extends React.Component {
 
     const messages = this.props.messages.map((source) => (
       {
-        avatar: <Avatar iconIndex={source.icon} colorIndex={source.color} />,
+        avatar: <Avatar iconIndex={source.iconIndex} colorIndex={source.colorIndex} />,
         id: source.id,
         name: source.name,
         body: source.body,

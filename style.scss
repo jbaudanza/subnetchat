@@ -185,23 +185,42 @@ header {
 }
 
 .identity-selector {
-  .row, .box-picker {
+  input[type=text] {
+    box-sizing: border-box;
+    height: 35px;
+    width: 355px;
+    font-size: 125%;
+  }
+
+  input[type=text], .picker-wrapper {
     margin-bottom: 10px;
   }
 
-  .row {
-    overflow: hidden;
-    padding: 2px;
+  label {
+    display: block;
+    font-weight: bold;
+  }
 
-    .avatar, input {
+  .picker-wrapper {
+    overflow: hidden;
+
+    .avatar {
+      margin-top: 2px;
+    }
+    .options {
+      margin-left: 10px;
+    }
+    .avatar, .options {
       float: left
     }
-    input {
-      box-sizing: border-box;
-      height: 35px;
-      width: 270px;
-      font-size: 125%;
-      margin-left: 4px;
+  }
+
+  .actions {
+    text-align: right;
+
+    input[type=submit] {
+      margin-left: 5px;
+      @include buttonize($highlight);
     }
   }
 }

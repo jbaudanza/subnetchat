@@ -27,11 +27,12 @@ function getFromLocalstorage(key, generator) {
   return localStorage[key];
 }
 
+
 function getIdentity() {
   return {
-    name: getFromLocalstorage('username', () => pick(words.adjectives) + ' ' + pick(words.animals)),
-    colorIndex: parseInt(getFromLocalstorage('color', () => randomIndex(8))),
-    iconIndex: parseInt(getFromLocalstorage('icon', () => randomIndex(8)))
+    name: getFromLocalstorage('name', () => pick(words.adjectives) + ' ' + pick(words.animals)),
+    colorIndex: parseInt(getFromLocalstorage('colorIndex', () => randomIndex(8))),
+    iconIndex: parseInt(getFromLocalstorage('iconIndex', () => randomIndex(8)))
   };
 }
 
@@ -79,8 +80,10 @@ class ChatApp extends React.Component {
   setIdentity(identity) {
     this.hideOverlay();
     this.setState({identity: identity});
+
+    Object.assign(localStorage, identity);
+
     // TODO
-    // - store in localStorage
     // - send an event to the server
   }
 
