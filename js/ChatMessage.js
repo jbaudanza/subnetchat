@@ -34,11 +34,6 @@ class ChatMessage extends React.Component {
         paddingBottom: 5,
         listStyleType: 'none'
       },
-      avatar: {
-        width: 35,
-        height: 35,
-        marginRight: 5
-      },
       timestamp: {
         color: '#ccc',
         float: 'right'
@@ -47,8 +42,8 @@ class ChatMessage extends React.Component {
 
     return (
       <li style={Object.assign({}, styles.row, this.props.style)}>
-        <img className="avatar" style={styles.avatar} src='' />
-        <div style={{flex: 1}}>
+        {this.props.avatar}
+        <div style={{flex: 1, marginLeft: 5}}>
           <div className="header">
             <b>{this.props.name}</b>
             <span className="timestamp" style={styles.timestamp}>
@@ -66,6 +61,7 @@ ChatMessage.propTypes = {
   timestamp: React.PropTypes.string.isRequired,
   body:      React.PropTypes.string.isRequired,
   name:      React.PropTypes.string.isRequired,
+  avatar:    React.PropTypes.node.isRequired,
   style:     React.PropTypes.object
 };
 

@@ -102,7 +102,7 @@ function Avatar(props) {
     <div className='avatar' style={{backgroundColor: colors[props.colorIndex]}}>
       {String.fromCharCode(icons[props.iconIndex])}
     </div>
-  )
+  );
 }
 
 
@@ -143,6 +143,20 @@ class ChatRoom extends React.Component {
       }
     };
 
+    const messages = this.props.messages.map((source) => (
+      {
+        avatar: <Avatar iconIndex={source.icon} colorIndex={source.color} />,
+        id: source.id,
+        name: source.name,
+        body: source.body,
+        timestamp: source.timestamp
+      })
+    );
+
+    const avatar = <Avatar
+        iconIndex={this.props.identity.icon}
+        colorIndex={this.props.identity.color} />
+
     return (
       <div>
         <header>
@@ -182,8 +196,8 @@ class ChatRoom extends React.Component {
           </div>
           <div style={style.rightColumn}>
             <div style={style.wrapper}>
-              <this.MessageList messages={this.props.messages} />
-              <MessageComposer onSubmit={this.props.onSubmitMessage} avatar={<Avatar iconIndex={2} colorIndex={3} />} />
+              <this.MessageList messages={messages} />
+              <MessageComposer onSubmit={this.props.onSubmitMessage} avatar={avatar} />
             </div>
           </div>
         </div>
