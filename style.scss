@@ -3,9 +3,46 @@ $darker:    #233140;
 $highlight: #18BC9C;
 $black:     #333;
 
+@import "bourbon";
+
+$base-font-family: 'Open Sans', sans-serif;
+
 body {
-  font-family: 'Open Sans', sans-serif;
+  font-family: $base-font-family;
   color: $black;
+}
+
+@mixin buttonize($background-color) {
+  display: inline-block;
+  border-radius: 7px;
+  color: white;
+  background-color: $background-color;
+  text-decoration: none;
+  font-weight: bold;
+  outline: none;
+  border: none;
+
+  text-align: center;
+  height: 40px;
+  line-height: 40px;
+  padding: 0 15px;
+  box-sizing: border-box;
+
+  &:active {
+    background-color: darken($background-color, 5%);
+  }
+  &:hover {
+    cursor: pointer;
+  }
+  &:disabled {
+    background-color: #bebebe;
+  }
+}
+
+.change-name-button {
+  margin-top: 5px;
+  margin-left: 4px;
+  @include buttonize($highlight);
 }
 
 ul.chat-nav li {
@@ -42,6 +79,7 @@ header {
   }
 
   .logo {
+    font-size: 125%;
     color: white;
     padding-bottom: 4px;
     text-decoration: none;
@@ -58,6 +96,18 @@ header {
   bottom: 0;
   left: 0;
   right: 0;
+
+  .timestamp {
+    font-size: 75%;
+  }
+}
+
+.message-composer {
+  input[type=submit] {
+    @include buttonize(#D8D8D8);
+    height: 20px;
+    line-height: 20px;
+  }
 }
 
 .channel-header {

@@ -103,10 +103,12 @@ const express = require('express');
 app.use(express.static('public'));
 
 const sass = require('node-sass');
+const bourbon = require('node-bourbon');
 
 app.get('/style.css', function(req, res) {
   sass.render({
     file: 'style.scss',
+    includePaths: bourbon.includePaths
   }, function(err, result) {
     if (err) {
       console.error(err);

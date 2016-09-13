@@ -124,7 +124,7 @@ class ChatRoom extends React.Component {
         </header>
         <div className='channel-header'>
           <div style={style.leftColumn}>
-            <span className='chatting-with'>Chatting with</span>
+            <span className='chatting-with'>You are chatting with</span>
             <span className='channel-name'>
               {this.props.channelName}
             </span>
@@ -134,13 +134,20 @@ class ChatRoom extends React.Component {
               {this.props.channelDescription}
             </span>
             <span className='channel-location'>
-              {this.props.channelLocation}
+              <i className="fa fa-map-marker" /> {this.props.channelLocation}
             </span>
           </div>
         </div>
         <div className='chat-room' style={{overflow: 'hidden'}}>
           <div style={style.leftColumn}>
-            <ChatNav presence={this.props.presence} />
+            <div style={style.wrapper}>
+              <ChatNav presence={this.props.presence} style={{display: 'flex', flex: 1}}/>
+              <div style={{display: 'flex', height: '57px'}}>
+                <a href="#" className='change-name-button'>
+                  Change your name or avatar
+                </a>
+              </div>
+            </div>
           </div>
           <div style={style.rightColumn}>
             <div style={style.wrapper}>

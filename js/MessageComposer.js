@@ -44,7 +44,7 @@ class MessageComposer extends React.Component {
     };
 
     return (
-      <div style={styles.wrapper}>
+      <div style={styles.wrapper} className='message-composer'>
         <img className='avatar' src={''} style={styles.avatar} />
         <form style={styles.form} onSubmit={this.onSubmit}>
           <input style={styles.input} type="text" onChange={this.onChange} value={this.state.message} />
