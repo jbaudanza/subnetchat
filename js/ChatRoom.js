@@ -39,12 +39,40 @@ function ChatNav(props) {
 }
 
 
+function durationString(duration) {
+  let hours, minutes, seconds;
+
+  if (duration > 0) {
+    hours = Math.floor(duration/(60 * 60));
+    minutes = Math.floor(duration/60) % 60;
+    seconds = Math.floor(duration % 60);
+  } else {
+    hours = minutes = seconds = 0;
+  }
+
+  function pad(number) {
+    if (number < 10)
+      return `0${number}`;
+    else
+      return number;
+  }
+
+  if (hours > 0)
+    return `${hours}:${pad(minutes)}:${pad(seconds)}`;
+  else if (minutes > 0)
+    return `4{minutes}:${pad(seconds)}`;
+  else
+    return `${seconds}`;
+}
+
+
+
 function Disconnected(props) {
   const seconds = Math.floor((props.reconnectingAt - props.now) /1000);
 
   return (
     <div>
-      You are disconnected. Reconnecting in {seconds} seconds.
+      You are disconnected. Reconnecting in {durationString(seconds)}.
     </div>
   );
 }
