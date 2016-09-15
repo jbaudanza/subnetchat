@@ -60,7 +60,7 @@ function durationString(duration) {
   if (hours > 0)
     return `${hours}:${pad(minutes)}:${pad(seconds)}`;
   else if (minutes > 0)
-    return `4{minutes}:${pad(seconds)}`;
+    return `${minutes}:${pad(seconds)}`;
   else
     return `${seconds}`;
 }
@@ -145,9 +145,9 @@ class ChatRoom extends React.Component {
 
     const messages = this.props.messages.map((source) => (
       {
-        avatar: <Avatar iconIndex={source.iconIndex} colorIndex={source.colorIndex} />,
+        avatar: <Avatar {...source.identity} />,
         id: source.id,
-        name: source.name,
+        name: source.identity.name,
         body: source.body,
         timestamp: source.timestamp
       })

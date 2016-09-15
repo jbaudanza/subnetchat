@@ -25,22 +25,31 @@ const onlineSessions = sessions(
 );
 
 
-const joinEvents = database.observable('chat-messages', 0, true)
+const joinEvents = database.observable('chat-messages')
   .map((batch) => batch.filter((o) => o.type === 'chat-join'))
   .scan((list, item) => list.concat(item), [])
 
 
+const identityEvents = database.observable('chat-identities')
+  .batchScan(reduceChatIdentities, {})
+
+const identities = identityEvents.map(function(events) {
+  return _.mapValues(events, (v) => v.identity);
+});
+
 // TODO: This is rescanning all the events to look for join events. Is there
 // someway to embed this into the SQL query?
-const presence = Rx.Observable.combineLatest(joinEvents, onlineSessions, reduceToPresenceList);
+const presence = Rx.Observable.combineLatest(identityEvents, onlineSessions, reduceToPresenceList);
 
-function reduceToPresenceList(joinEvents, sessionIds) {
-  return joinEvents
+function reduceToPresenceList(identityEvents, sessionIds) {
+  return _.values(identityEvents)
       .filter((e) => _.includes(sessionIds, e.sessionId))
-      .map(e => e.name);
+      .map(e => e.identity);
 }
 
-
+function reduceChatIdentities(set, event) {
+  return Object.assign({}, set, {[event.identityId]: event});
+}
 
 function addressForSocket(socket) {
   return (
@@ -49,31 +58,27 @@ function addressForSocket(socket) {
   );
 }
 
-// TODO:
-//  - rethink how bulk messages are sent
-//  - Is is right to require that all events are Objects (not strings or numbers)
-//  - Rethink the minId concept.
 const observables = {
   "chat-messages"(minId) {
+    // TODO: don't send down all the database metadata
     return database.observable("chat-messages", minId);
   },
 
-  "presence"(minId, socket, sessionId) {
-    // TODO: The observables server should handle this
-    let count = 0;
-    return presence.map(value => [{value: value, id: minId + ++count}])
+  // TODO: I don't think this is going to restart correctly.
+  "presence"() {
+    return presence;
   },
 
-  "channel-name"(minId) {
-    return Rx.Observable.of([channelName])
+  "identities"() {
+    return identities;
   },
 
   "ip-address"(minId, socket) {
     let count = 0;
-    return Rx.Observable.of([{
+    return Rx.Observable.of({
       id: minId + ++count,
       ipAddress: addressForSocket(socket)
-    }])
+    });
   }
 }
 

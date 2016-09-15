@@ -6,7 +6,7 @@ import * as words from './words';
 import channelNameFromAddress from './channelName';
 import IdentitySelector from './IdentitySelector'
 import Overlay from './Overlay';
-
+import uuid from 'node-uuid';
 
 
 function randomIndex(ceil) {
@@ -25,6 +25,11 @@ function getFromLocalstorage(key, generator) {
   }
 
   return localStorage[key];
+}
+
+
+function getIdentityId() {
+  return getFromLocalstorage('identityId', () => uuid.v4());
 }
 
 
@@ -66,6 +71,16 @@ function subscribeToComponent(Component, observables) {
 }
 
 
+function addIdentitiesToMessages(messages, identities) {
+  return messages.map((msg) => ({
+    id: msg.id,
+    body: msg.body,
+    timestamp: msg.timestamp,
+    identity: identities[msg.identityId]
+  }))
+}
+
+
 class ChatApp extends React.Component {
   constructor(props) {
     super(props);
@@ -83,8 +98,7 @@ class ChatApp extends React.Component {
 
     Object.assign(localStorage, identity);
 
-    // TODO
-    // - send an event to the server
+    this.publishIdentity();
   }
 
   componentWillMount() {
@@ -98,34 +112,46 @@ class ChatApp extends React.Component {
     const messages = this.props.jindo.observable('chat-messages')
       .filter((msg) => msg.type === 'chat-message')
       .scan((list, e) => list.concat(e), [])
-      .startWith([]);
 
     const presence = this.props.jindo
         .observable('presence')
-        .map(v => v.value)
-        .startWith([]);
+        .startWith([])
+        .map(list => list.map(i => i.name));
+
+    const messagesWithIdentity = Rx.Observable.combineLatest(
+      messages,
+      this.props.jindo.observable('identities'),
+      addIdentitiesToMessages
+    ).startWith([]);
 
     const channelName = this.props.jindo.observable('ip-address')
         .map(v => channelNameFromAddress(v.ipAddress));
 
     this.Observer = subscribeToComponent(ChatRoom, {
-      messages: messages,
+      messages: messagesWithIdentity,
       presence: presence,
       connected: this.props.jindo.connected,
       reconnectingAt: this.props.jindo.reconnectingAt,
       channelName: channelName
     })
 
-    this.props.jindo.publish('chat-messages', Object.assign({
-      type: 'chat-join'
-    }, getIdentity()));
+    this.publishIdentity();
+  }
+
+  publishIdentity() {
+    this.props.jindo.publish('chat-identities', {
+      type: 'identify',
+      identityId: getIdentityId(),
+      identity: getIdentity()
+    });
   }
 
   onSubmitMessage(message) {
-    this.props.jindo.publish('chat-messages', Object.assign({
+    this.props.jindo.publish('chat-messages', {
       type: 'chat-message',
-      body: message
-    }, getIdentity()));
+      body: message,
+      identityId: getIdentityId()
+    });
   }
 
   showOverlay() {
