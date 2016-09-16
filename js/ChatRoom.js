@@ -8,22 +8,10 @@ import Link from './Link';
 
 
 function ChatNavItem(props) {
-  let icon;
-  let className;
-
-  if (props.type === 'user') {
-    icon = <FontAwesome icon='user' />
-  } else {
-    icon = <i>#</i>;
-  }
-
-  if (props.selected) {
-    className = 'selected';
-  }
-
   return (
-    <li className={className}>
-      <a href="#">{icon}<span>{props.children}</span></a>
+    <li>
+      <Avatar iconIndex={props.iconIndex} colorIndex={props.colorIndex} />
+      <span>{props.name}</span>
     </li>
   );
 }
@@ -33,7 +21,7 @@ function ChatNav(props) {
   const style = Object.assign({padding: 0, margin: 0}, props.style)
   return (
     <ul className='chat-nav' style={style}>
-      {props.presence.map((name, i) => <ChatNavItem key={i} type="user">{name}</ChatNavItem>)}
+      {props.presence.map((identity, i) => <ChatNavItem key={i} {...identity} />)}
     </ul>
   );
 }
@@ -140,6 +128,15 @@ class ChatRoom extends React.Component {
         float: 'left',
         height: '100%',
         position: 'relative'
+      },
+      pageWrapper: {
+        position: 'fixed',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        display: 'flex',
+        flexDirection: 'column'
       }
     };
 
@@ -153,10 +150,10 @@ class ChatRoom extends React.Component {
       })
     );
 
-    const avatar = <Avatar {...this.props.identity} />
+    const avatar = <Avatar {...this.props.identity} />;
 
     return (
-      <div>
+      <div style={style.pageWrapper}>
         <header>
           <a href="https://www.subnetchat.com/" className='logo'>
             subnetchat.com
@@ -181,10 +178,10 @@ class ChatRoom extends React.Component {
             </span>
           </div>
         </div>
-        <div className='chat-room' style={{overflow: 'hidden'}}>
+        <div className='chat-room' style={{overflow: 'hidden', flex: 1}}>
           <div style={style.leftColumn}>
             <div style={style.wrapper}>
-              <ChatNav presence={this.props.presence} style={{display: 'flex', flex: 1}}/>
+              <ChatNav presence={this.props.presence} style={{flex: 1}}/>
               <div style={{display: 'flex', height: '57px'}}>
                 <Link className='change-name-button' onClick={this.props.onChangeName}>
                   Change your name or avatar

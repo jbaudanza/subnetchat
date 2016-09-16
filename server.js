@@ -59,9 +59,9 @@ function addressForSocket(socket) {
 }
 
 const observables = {
-  "chat-messages"(minId) {
+  "chat-messages"() {
     // TODO: don't send down all the database metadata
-    return database.observable("chat-messages", minId);
+    return database.observable("chat-messages");
   },
 
   // TODO: I don't think this is going to restart correctly.

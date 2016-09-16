@@ -67,14 +67,13 @@ body {
 
 ul.chat-nav li {
   list-style-type: none;
-  height: 25px;
-  line-height: 25px;
+  overflow: hidden;
+  line-height: 35px;
+  padding: 5px;
 
-  i {
-    color: $highlight;
-    width: 25px;
-    display: inline-block;
-    text-align: center;
+  .avatar {
+    float: left;
+    margin-right: 5px;
   }
 
   > a {
@@ -111,11 +110,6 @@ header {
 }
 
 .chat-room {
-  position: fixed;
-  top: 125px;
-  bottom: 0;
-  left: 0;
-  right: 0;
 
   .timestamp {
     font-size: 75%;

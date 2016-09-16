@@ -115,8 +115,7 @@ class ChatApp extends React.Component {
 
     const presence = this.props.jindo
         .observable('presence')
-        .startWith([])
-        .map(list => list.map(i => i.name));
+        .startWith([]);
 
     const messagesWithIdentity = Rx.Observable.combineLatest(
       messages,
