@@ -202,7 +202,7 @@ header {
       margin-top: 2px;
     }
     .options {
-      margin-left: 10px;
+      margin-left: 20px;
     }
     .avatar, .options {
       float: left
@@ -213,7 +213,7 @@ header {
     text-align: right;
 
     input[type=submit] {
-      margin-left: 5px;
+      margin-left: 10px;
       @include buttonize($highlight);
     }
   }

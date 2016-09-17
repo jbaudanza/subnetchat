@@ -184,7 +184,7 @@ class ChatRoom extends React.Component {
               <ChatNav presence={this.props.presence} style={{flex: 1}}/>
               <div style={{display: 'flex', height: '57px'}}>
                 <Link className='change-name-button' onClick={this.props.onChangeName}>
-                  Change your name or avatar
+                  Change your name
                 </Link>
               </div>
             </div>

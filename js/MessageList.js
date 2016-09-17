@@ -28,6 +28,7 @@ export default class MessageList extends React.Component {
       margin: 0,
       flex: 1,
       border: '1px solid #eee',
+      borderTop: 'none',
       padding: '5px'
     };
 
