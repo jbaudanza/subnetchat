@@ -112,22 +112,29 @@ class ChatRoom extends React.Component {
 
     const style = {
       wrapper: {
-        height: '100%',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        flex: 1,
+      },
+      gridContainer: {
+        overflow: 'hidden',
+        flex: 1,
+        display: 'flex'
       },
       leftColumn: {
         width: '20%',
         boxSizing: 'border-box',
         float: 'left',
-        height: '100%'
+        display: 'flex',
+        flexDirection: 'column'
       },
       rightColumn: {
         width: '80%',
         boxSizing: 'border-box',
         float: 'left',
-        height: '100%',
-        position: 'relative'
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column'
       },
       pageWrapper: {
         position: 'fixed',
@@ -178,22 +185,18 @@ class ChatRoom extends React.Component {
             </span>
           </div>
         </div>
-        <div className='chat-room' style={{overflow: 'hidden', flex: 1}}>
+        <div className='chat-room' style={style.gridContainer}>
           <div style={style.leftColumn}>
-            <div style={style.wrapper}>
-              <ChatNav presence={this.props.presence} style={{flex: 1}}/>
-              <div style={{display: 'flex', height: '57px'}}>
-                <Link className='change-name-button' onClick={this.props.onChangeName}>
-                  Change your name
-                </Link>
-              </div>
+            <ChatNav presence={this.props.presence} style={{flex: 1}}/>
+            <div style={{height: '57px'}}>
+              <Link className='change-name-button' onClick={this.props.onChangeName}>
+                Change your name
+              </Link>
             </div>
           </div>
           <div style={style.rightColumn}>
-            <div style={style.wrapper}>
-              <this.MessageList messages={messages} />
-              <MessageComposer onSubmit={this.props.onSubmitMessage} avatar={avatar} />
-            </div>
+            <this.MessageList messages={messages} />
+            <MessageComposer onSubmit={this.props.onSubmitMessage} avatar={avatar} />
           </div>
         </div>
       </div>
