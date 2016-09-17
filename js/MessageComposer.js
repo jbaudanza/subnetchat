@@ -11,12 +11,19 @@ class MessageComposer extends React.Component {
 
   onSubmit(event) {
     event.preventDefault();
-    this.props.onSubmit(this.state.message);
-    this.setState({message: ''});
+
+    if (this.isEnabled()) {
+      this.props.onSubmit(this.state.message);
+      this.setState({message: ''});
+    }
   }
 
   onChange(event) {
     this.setState({message: event.target.value.slice(0, 256)});
+  }
+
+  isEnabled() {
+    return !!this.state.message.trim();
   }
 
   render() {
@@ -44,7 +51,7 @@ class MessageComposer extends React.Component {
         {this.props.avatar}
         <form style={styles.form} onSubmit={this.onSubmit}>
           <input style={styles.input} type="text" onChange={this.onChange} value={this.state.message} />
-          <input style={styles.sendButton} type="submit" value="send" disabled={!this.state.message.trim()} />
+          <input style={styles.sendButton} type="submit" value="send" disabled={!this.isEnabled()} />
         </form>
       </div>
     );
