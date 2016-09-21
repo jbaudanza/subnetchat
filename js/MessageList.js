@@ -1,24 +1,25 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 
 import ChatMessage from './ChatMessage';
 
 export default class MessageList extends React.Component {
   componentDidMount() {
-    this.scrollToBottom();
+    setTimeout(this.scrollToBottom.bind(this), 0);
   }
 
   componentDidUpdate(prevProps: Object, prevState: Object) {
     if (this.props.messages.length !== prevProps.messages.length) {
-      const ul = this.refs.messageList;
+      const ul = ReactDOM.findDOMNode(this);
 
       // If the user is somewhat close to the bottom of the scroll window
       if (ul.clientHeight + ul.scrollTop + 100 >= ul.scrollHeight)
-        this.scrollToBottom()
+        this.scrollToBottom();
     }
   }
 
   scrollToBottom() {
-    const ul = this.refs.messageList;
+    const ul = ReactDOM.findDOMNode(this);
     ul.scrollTop = ul.scrollHeight - ul.clientHeight;
   }
 
@@ -35,7 +36,7 @@ export default class MessageList extends React.Component {
     const borderBottom = {borderBottom: '1px solid #eee'};
 
     return (
-      <ul style={style} ref='messageList'>
+      <ul style={style}>
         {
           this.props.messages.map((e, i) => (
             <ChatMessage
