@@ -59,28 +59,23 @@ function addressForSocket(socket) {
 }
 
 const observables = {
-  "chat-messages": [function() {
+  "chat-messages"(offset) {
     // TODO: don't send down all the database metadata
-    return database.observable("chat-messages");
-  }, 'cold'],
+    return database.observable("chat-messages", offset);
+  },
 
-  // TODO: I don't think this is going to restart correctly.
-  "presence": [function() {
+  "presence"() {
     return presence;
-  }, 'hot'],
+  },
 
-  "identities": [function() {
+  "identities"() {
     return identities;
-  }, 'hot'],
+  },
 
-  "ip-address": [function(minId, socket) {
-    let count = 0;
-    return Rx.Observable.of({
-      id: minId + ++count,
-      ipAddress: addressForSocket(socket)
-    });
-  }, 'hot']
-}
+  "ip-address"(offset, socket) {
+    return Rx.Observable.of(addressForSocket(socket));
+  }
+};
 
 const app = jindo.start(observables);
 

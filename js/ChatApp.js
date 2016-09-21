@@ -124,7 +124,7 @@ class ChatApp extends React.Component {
     ).startWith([]);
 
     const channelName = this.props.jindo.observable('ip-address')
-        .map(v => channelNameFromAddress(v.ipAddress));
+        .map(channelNameFromAddress);
 
     this.Observer = subscribeToComponent(ChatRoom, {
       messages: messagesWithIdentity,

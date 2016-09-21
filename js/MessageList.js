@@ -5,6 +5,7 @@ import ChatMessage from './ChatMessage';
 
 export default class MessageList extends React.Component {
   componentDidMount() {
+    // TODO: this doesn't seem to work
     setTimeout(this.scrollToBottom.bind(this), 0);
   }
 
