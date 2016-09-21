@@ -59,33 +59,34 @@ function addressForSocket(socket) {
 }
 
 const observables = {
-  "chat-messages"() {
+  "chat-messages": [function() {
     // TODO: don't send down all the database metadata
     return database.observable("chat-messages");
-  },
+  }, 'cold'],
 
   // TODO: I don't think this is going to restart correctly.
-  "presence"() {
+  "presence": [function() {
     return presence;
-  },
+  }, 'hot'],
 
-  "identities"() {
+  "identities": [function() {
     return identities;
-  },
+  }, 'hot'],
 
-  "ip-address"(minId, socket) {
+  "ip-address": [function(minId, socket) {
     let count = 0;
     return Rx.Observable.of({
       id: minId + ++count,
       ipAddress: addressForSocket(socket)
     });
-  }
+  }, 'hot']
 }
 
 const app = jindo.start(observables);
 
 const browserifyOptions = {
-  transform: [['babelify', {presets: ["react", 'es2015'], plugins: ['transform-flow-strip-types']}]]
+  transform: [['babelify', {presets: ["react", 'es2015'], plugins: ['transform-flow-strip-types']}]],
+  ignore: ["ws"] // TODO: This should really go in the jindo package somehow
 };
 
 if (app.settings.env === 'development') {
