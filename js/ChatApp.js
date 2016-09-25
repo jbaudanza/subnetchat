@@ -72,12 +72,30 @@ function subscribeToComponent(Component, observables) {
 
 
 function addIdentitiesToMessages(messages, identities) {
-  return messages.map((msg) => ({
-    id: msg.id,
-    body: msg.body,
-    timestamp: msg.timestamp,
-    identity: identities[msg.identityId]
-  }))
+  return messages.map(function(msg) {
+    let identity;
+
+    if ('identityId' in msg) {
+      if (msg.identityId in identities) {
+        identity = identities[msg.identityId]
+      } else {
+        console.warn('Identity not found for ' + msg.identityId);
+      }
+    } else {
+      console.warn('Message is missing identityId', message);
+    }
+
+    if (!identity) {
+      identity = {name: '???'};
+    }
+
+    return {
+      id: msg.id,
+      body: msg.body,
+      timestamp: msg.timestamp,
+      identity: identity
+    }
+  });
 }
 
 

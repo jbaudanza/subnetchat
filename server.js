@@ -19,19 +19,22 @@ const sessions = require('jindo/lib/server/presence').sessions;
 const _ = require('lodash');
 const channelName = require('./js/channelName');
 
+function mapMetadataForServerEvents(list) {
+  return Object.assign({}, list[0], list[1])
+}
+
 const onlineSessions = sessions(
-    database.observable('connection-events'),
-    database.observable('process-lifecycle')
+    database
+        .observable('connection-events', {includeMetadata: true})
+        .map(mapMetadataForServerEvents),
+    database.observable('process-lifecycle', {includeMetadata: true})
+        .map(mapMetadataForServerEvents)
 );
 
 
-const joinEvents = database.observable('chat-messages')
-  .map((batch) => batch.filter((o) => o.type === 'chat-join'))
-  .scan((list, item) => list.concat(item), [])
-
-
-const identityEvents = database.observable('chat-identities')
-  .batchScan(reduceChatIdentities, {})
+const identityEvents = database.observable('chat-identities', {includeMetadata: true})
+  .map(mapMetadataForServerEvents)
+  .scan(reduceChatIdentities, {})
 
 const identities = identityEvents.map(function(events) {
   return _.mapValues(events, (v) => v.identity);
@@ -40,6 +43,7 @@ const identities = identityEvents.map(function(events) {
 // TODO: This is rescanning all the events to look for join events. Is there
 // someway to embed this into the SQL query?
 const presence = Rx.Observable.combineLatest(identityEvents, onlineSessions, reduceToPresenceList);
+
 
 function reduceToPresenceList(identityEvents, sessionIds) {
   return _.values(identityEvents)
@@ -58,10 +62,17 @@ function addressForSocket(socket) {
   );
 }
 
+function mapMetadata(list) {
+  const value = list[0];
+  const meta = list[1];
+  return Object.assign({}, value, {timestamp: meta.timestamp, id: meta.id});
+}
+
 const observables = {
   "chat-messages"(offset) {
-    // TODO: don't send down all the database metadata
-    return database.observable("chat-messages", offset);
+    return database
+      .observable("chat-messages", {offset, includeMetadata: true})
+      .map(mapMetadata);
   },
 
   "presence"() {
