@@ -131,13 +131,17 @@ class ChatApp extends React.Component {
       .filter((msg) => msg.type === 'chat-message')
       .scan((list, e) => list.concat(e), [])
 
-    const presence = this.props.jindo
-        .observable('presence')
-        .startWith([]);
+    const identities = this.props.jindo.observable('identities')
+
+    const presence = Rx.Observable.combineLatest(
+      this.props.jindo.observable('presence'),
+      identities,
+      (presenceList, identities) => presenceList.map((id) => identities[id]).filter(x => x)
+    ).startWith([]);
 
     const messagesWithIdentity = Rx.Observable.combineLatest(
       messages,
-      this.props.jindo.observable('identities'),
+      identities,
       addIdentitiesToMessages
     ).startWith([]);
 

@@ -31,29 +31,29 @@ const onlineSessions = sessions(
         .map(mapMetadataForServerEvents)
 );
 
+const sessionToIdentity =
+  database.observable('chat-identities', {includeMetadata: true})
+    .map(mapMetadataForServerEvents)
+    .scan((set, event) => Object.assign(set, {[event.sessionId]: event.identityId}), {})
+    //.snapshotLatest('chat-identities', (i, j) => i.lastId < j.lastId, () => true)
 
-const identityEvents = database.observable('chat-identities', {includeMetadata: true})
-  .map(mapMetadataForServerEvents)
-  .scan(reduceChatIdentities, {})
 
-const identities = identityEvents.map(function(events) {
-  return _.mapValues(events, (v) => v.identity);
-});
+const identities = database.observable('chat-identities')
+  .scan((set, event) => Object.assign(set, {[event.identityId]: event.identity}), {});
 
 // TODO: This is rescanning all the events to look for join events. Is there
 // someway to embed this into the SQL query?
-const presence = Rx.Observable.combineLatest(identityEvents, onlineSessions, reduceToPresenceList);
+const presence = Rx.Observable.combineLatest(sessionToIdentity, onlineSessions, reduceToPresenceList);
 
 
-function reduceToPresenceList(identityEvents, sessionIds) {
-  return _.values(identityEvents)
-      .filter((e) => _.includes(sessionIds, e.sessionId))
-      .map(e => e.identity);
+function reduceToPresenceList(sessionToIdentity, sessionIds) {
+  return _.chain(sessionToIdentity)
+    .pick(sessionIds)
+    .values()
+    .uniq()
+    .value();
 }
 
-function reduceChatIdentities(set, event) {
-  return Object.assign({}, set, {[event.identityId]: event});
-}
 
 function addressForSocket(socket) {
   return (
