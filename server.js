@@ -1,12 +1,5 @@
 "use strict";
 
-/*
- TODO:
-   - fix names. Probably need to rename name to queue-name, stream-name, etc..
-   - expose a stream of presence info
-   - export an ip specific stream
- */
-
 require("babel-register")({
   presets: "es2015-node4",
   plugins: 'transform-flow-strip-types'
@@ -16,8 +9,10 @@ const Rx = require('rxjs');
 const jindo = require('jindo/lib/server');
 const database = require('jindo/lib/server/database');
 const sessions = require('jindo/lib/server/presence').sessions;
+require('jindo/lib/server/snapshotLatest');
+
 const _ = require('lodash');
-const channelName = require('./js/channelName');
+const channelName = require('./js/channelName').default;
 
 function mapMetadataForServerEvents(list) {
   return Object.assign({}, list[0], list[1])
@@ -38,12 +33,24 @@ const sessionToIdentity =
     //.snapshotLatest('chat-identities', (i, j) => i.lastId < j.lastId, () => true)
 
 
-const identities = database.observable('chat-identities')
-  .scan((set, event) => Object.assign(set, {[event.identityId]: event.identity}), {});
+// This is a set of any identity that has ever been seen.
+/*
+  This could be a behavior subject. How would new events be fed in?
+    - A designated worker?
+    - The server that receives the identity event will update the subject
+  How do you stop from re-ingesting the same events?
 
-// TODO: This is rescanning all the events to look for join events. Is there
-// someway to embed this into the SQL query?
-const presence = Rx.Observable.combineLatest(sessionToIdentity, onlineSessions, reduceToPresenceList);
+  There's two strategies for reducing state.
+   - generate on read
+      - use a ReplaySubject and snapshotLatest()
+      - Maybe snapshotLatest takes a subject or observer/observable pair
+   - generate on write
+      - use a BehaviorSubject and recalculate on write. (How to deal with write conflicts?)
+   - consider how you would solve these problems in a traditional relational-db? how
+     do those solutions map onto observable patterns?
+*/
+//const identities = database.observable('chat-identities')
+//  .scan((set, event) => Object.assign(set, {[event.identityId]: event.identity}), {});
 
 
 function reduceToPresenceList(sessionToIdentity, sessionIds) {
@@ -68,19 +75,40 @@ function mapMetadata(list) {
   return Object.assign({}, value, {timestamp: meta.timestamp, id: meta.id});
 }
 
+function keyNameForSocket(prefix, socket) {
+  return keyNameForIp(prefix, addressForSocket(socket))
+}
+
+function keyNameForIp(prefix, ipAddress) {
+  return prefix + '-' + channelName(ipAddress);
+}
+
 const observables = {
-  "chat-messages"(offset) {
+  "chat-messages"(offset, socket) {
+    const key = keyNameForSocket('chat-messages', socket);
     return database
-      .observable("chat-messages", {offset, includeMetadata: true})
+      .observable(key, {offset, includeMetadata: true})
       .map(mapMetadata);
   },
 
-  "presence"() {
-    return presence;
+  "presence"(offset, socket) {
+    // TODO: This is rescanning all the events to look for join events. Is there
+    // someway to embed this into the SQL query?
+    const key = keyNameForSocket('chat-identities', socket);
+
+    const sessionToIdentity = database.observable(key, {includeMetadata: true})
+        .map(mapMetadataForServerEvents)
+        .scan((set, event) => Object.assign(set, {[event.sessionId]: event.identityId}), {})
+
+    return Rx.Observable.combineLatest(
+      sessionToIdentity, onlineSessions, reduceToPresenceList
+    );
   },
 
-  "identities"() {
-    return identities;
+  "identities"(offset, socket) {
+    const key = keyNameForSocket('chat-identities', socket);
+    return database.observable(key)
+      .scan((set, event) => Object.assign(set, {[event.identityId]: event.identity}), {});
   },
 
   "ip-address"(offset, socket) {
@@ -88,7 +116,54 @@ const observables = {
   }
 };
 
-const app = jindo.start(observables);
+
+//
+// Input: key, metadata
+// Ouput: key, throttling rate
+/*
+ Notes:
+   maybe throttling should go in a different datastructure
+   in the future, this might be responsible for routing somethign thigns
+     to redis vs postgres.
+
+  What should you call this datastructure?
+
+   - observers
+   - event sinks
+   - endpoints
+   - next
+   - handlers
+
+*/
+
+let limit;
+if (process.env['NODE_ENV'] === 'production') {
+  limit = 5;
+} else {
+  limit = 1000;
+}
+
+const windowSize = '10 seconds';
+
+const handlers = {
+  'chat-identities'(value, metadata) {
+    const key = keyNameForIp('chat-identities', metadata.ipAddress);
+
+    return database.throttled({ipAddress: metadata.ipAddress, key: key}, windowSize, limit,
+        () => database.insertEvent(key, value, metadata)
+    );
+  },
+
+  'chat-messages'(value, metadata) {
+    const key = keyNameForIp('chat-messages', metadata.ipAddress);
+
+    return database.throttled({ipAddress: metadata.ipAddress, key: key}, windowSize, limit,
+        () => database.insertEvent(key, value, metadata)
+    );
+  }
+};
+
+const app = jindo.start(observables, handlers);
 
 const browserifyOptions = {
   transform: [['babelify', {presets: ["react", 'es2015'], plugins: ['transform-flow-strip-types']}]],
