@@ -18,19 +18,25 @@ function mapMetadataForServerEvents(list) {
   return Object.assign({}, list[0], list[1])
 }
 
+
+
+// Only pull an hours worth of process lifecycle events
+const processFilter = {
+  timestamp: {$gt: new Date(Date.now() - 60 * 60 * 1000)}
+};
+
+/*
+   This is a list of all session ids that are currently online. It looks like:
+
+    [sessionId, sessionId, sessionId, ...]
+ */
 const onlineSessions = sessions(
     database
         .observable('connection-events', {includeMetadata: true})
         .map(mapMetadataForServerEvents),
-    database.observable('process-lifecycle', {includeMetadata: true})
+    database.observable('process-lifecycle', {includeMetadata: true, filters: processFilter})
         .map(mapMetadataForServerEvents)
 );
-
-const sessionToIdentity =
-  database.observable('chat-identities', {includeMetadata: true})
-    .map(mapMetadataForServerEvents)
-    .scan((set, event) => Object.assign(set, {[event.sessionId]: event.identityId}), {})
-    //.snapshotLatest('chat-identities', (i, j) => i.lastId < j.lastId, () => true)
 
 
 // This is a set of any identity that has ever been seen.
@@ -115,26 +121,6 @@ const observables = {
     return Rx.Observable.of(addressForSocket(socket));
   }
 };
-
-
-//
-// Input: key, metadata
-// Ouput: key, throttling rate
-/*
- Notes:
-   maybe throttling should go in a different datastructure
-   in the future, this might be responsible for routing somethign thigns
-     to redis vs postgres.
-
-  What should you call this datastructure?
-
-   - observers
-   - event sinks
-   - endpoints
-   - next
-   - handlers
-
-*/
 
 let limit;
 if (process.env['NODE_ENV'] === 'production') {
