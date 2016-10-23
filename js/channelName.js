@@ -16,6 +16,6 @@ export default function channelName(addressString) {
 
   addr = new ip.Address4(addressString);
   if (addr.valid) {
-    return chomp(addr, ':');
+    return chomp(addr, '.');
   }
 }
