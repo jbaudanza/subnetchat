@@ -5,8 +5,6 @@ import Link from './Link';
 
 class Overlay extends React.Component {
 
-  _keyDownHandler: EventHandler;
-
   componentDidMount() {
     this._keyDownHandler = this.onKeyDown.bind(this);
     document.addEventListener('keydown', this._keyDownHandler);
