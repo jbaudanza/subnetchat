@@ -1,5 +1,7 @@
 ## Install dependencies
 
+[![Join the chat at https://gitter.im/subnetchat/Lobby](https://badges.gitter.im/subnetchat/Lobby.svg)](https://gitter.im/subnetchat/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
     npm install
 
 or
