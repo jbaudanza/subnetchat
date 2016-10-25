@@ -164,7 +164,6 @@ if (app.settings.env === 'development') {
 
 let logFormat;
 if (process.env['NODE_ENV'] !== 'production') {
-  require('dotenv').config();
   logFormat = 'dev';
 } else {
   logFormat = 'short';

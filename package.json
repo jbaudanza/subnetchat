@@ -19,7 +19,6 @@
     "babelify": "^7.3.0",
     "browserify": "^13.0.1",
     "browserify-middleware": "^7.0.0",
-    "dotenv": "^2.0.0",
     "ip-address": "^5.8.2",
     "jindo": "jbaudanza/jindo#69eacf6",
     "linkify": "jbaudanza/javascript-linkify",
