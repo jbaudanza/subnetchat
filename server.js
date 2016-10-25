@@ -14,6 +14,8 @@ require('jindo/lib/server/snapshotLatest');
 const _ = require('lodash');
 const channelName = require('./js/channelName').default;
 
+const batchScan = require('rxremote/batches').batchScan;
+
 function mapMetadataForServerEvents(list) {
   return Object.assign({}, list[0], list[1])
 }
@@ -113,8 +115,11 @@ const observables = {
 
   "identities"(offset, socket) {
     const key = keyNameForSocket('chat-identities', socket);
-    return database.observable(key)
-      .scan((set, event) => Object.assign(set, {[event.identityId]: event.identity}), {});
+    const observable = database.observable(key);
+
+    return batchScan.call(observable,
+      (set, event) => Object.assign(set, {[event.identityId]: event.identity}), {}
+    )
   },
 
   "ip-address"(offset, socket) {
