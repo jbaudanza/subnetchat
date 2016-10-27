@@ -27,13 +27,11 @@
     "linkify": "jbaudanza/javascript-linkify",
     "morgan": "^1.7.0",
     "node-bourbon": "^4.2.8",
+    "node-sass": "^3.10.1",
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
     "rxjs": "^5.0.0-rc.1",
     "sass": "^0.5.0",
     "utf-8-validate": "^1.2.1"
-  },
-  "devDependencies": {
-    "node-sass": "^3.10.1"
   }
 }

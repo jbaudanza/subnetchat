@@ -184,20 +184,6 @@ app.use(require('morgan')(logFormat));
 const express = require('express');
 app.use(express.static('public'));
 
-const sass = require('node-sass');
-const bourbon = require('node-bourbon');
-
-app.get('/style.css', function(req, res) {
-  sass.render({
-    file: 'style.scss',
-    includePaths: bourbon.includePaths
-  }, function(err, result) {
-    if (err) {
-      console.error(err);
-      res.status(500).send("Internal Service Error")
-    } else {
-      res.setHeader('Content-Type', 'text/css');
-      res.send(result.css);
-    }
-  });
-});
+if (process.env['NODE_ENV'] !== 'production') {
+  app.get('/style.css', require('./stylesheet').serve);
+}
