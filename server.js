@@ -161,15 +161,14 @@ const handlers = {
 const app = jindo.start(observables, handlers);
 
 const browserifyOptions = {
-  transform: [['babelify', {presets: ["react", 'es2015'], plugins: ['transform-flow-strip-types']}]],
-  ignore: ["ws"] // TODO: This should really go in the jindo package somehow
+  transform: [['babelify', {presets: ["react", 'es2015'], plugins: ['transform-flow-strip-types']}]]
 };
 
 if (app.settings.env === 'development') {
   const browserify = require('browserify-middleware');
   app.get('/chat.js', browserify('./js/index.js', browserifyOptions));
+  app.get('/style.css', require('./stylesheet').serve);
 }
-
 
 let logFormat;
 if (process.env['NODE_ENV'] !== 'production') {
@@ -184,6 +183,3 @@ app.use(require('morgan')(logFormat));
 const express = require('express');
 app.use(express.static('public'));
 
-if (process.env['NODE_ENV'] !== 'production') {
-  app.get('/style.css', require('./stylesheet').serve);
-}

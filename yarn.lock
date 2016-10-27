@@ -2094,9 +2094,10 @@ isstream@~0.1.2, isstream@0.1.x:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
 
-jindo@jbaudanza/jindo#69eacf6:
-  version "0.0.1"
-  resolved "https://codeload.github.com/jbaudanza/jindo/tar.gz/69eacf6"
+jbaudanza/jindo#abb56b95c:
+  name jindo
+  version "0.0.2"
+  resolved "https://codeload.github.com/jbaudanza/jindo/tar.gz/abb56b95c"
   dependencies:
     body-parser "^1.15.1"
     bufferutil "^1.2.1"
@@ -2113,7 +2114,30 @@ jindo@jbaudanza/jindo#69eacf6:
     pg-pool "^1.4.3"
     qs "^6.2.0"
     rxjs "^5.0.0-rc.1"
-    rxremote jbaudanza/rxremote#247a38ee
+    rxremote "0.0.2"
+    whatwg-fetch "^1.0.0"
+    ws "^1.1.0"
+
+jindo@jbaudanza/jindo#9618f5e0:
+  version "0.0.1"
+  resolved "https://codeload.github.com/jbaudanza/jindo/tar.gz/9618f5e0"
+  dependencies:
+    body-parser "^1.15.1"
+    bufferutil "^1.2.1"
+    cookie-parser "^1.4.3"
+    csrf "^3.0.3"
+    csurf "^1.9.0"
+    express "^4.13.4"
+    express-promise "^0.4.0"
+    jsonwebtoken "^7.0.1"
+    lodash "^4.14.2"
+    node-fetch "^1.5.3"
+    node-uuid "^1.4.7"
+    pg "^6.1.0"
+    pg-pool "^1.4.3"
+    qs "^6.2.0"
+    rxjs "^5.0.0-rc.1"
+    rxremote "0.0.2"
     whatwg-fetch "^1.0.0"
     ws "^1.1.0"
 
@@ -2302,7 +2326,7 @@ lodash.repeat@^4.0.4:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/lodash.repeat/-/lodash.repeat-4.1.0.tgz#fc7de8131d8c8ac07e4b49f74ffe829d1f2bec44"
 
-lodash@^4.0.0, lodash@^4.14.2, lodash@^4.16.4, lodash@^4.2.0:
+lodash@^4.0.0, lodash@^4.14.2, lodash@^4.2.0:
   version "4.16.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.16.4.tgz#01ce306b9bad1319f2a5528674f88297aeb70127"
 
@@ -3151,12 +3175,11 @@ rxjs@^5.0.0-rc.1:
   dependencies:
     symbol-observable "^1.0.1"
 
-rxremote@jbaudanza/rxremote#247a38ee:
-  version "0.0.1"
-  resolved "https://codeload.github.com/jbaudanza/rxremote/tar.gz/247a38ee"
+rxremote@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/rxremote/-/rxremote-0.0.2.tgz#707b797c07281acaf698e68a15a9f9725aa121c7"
   dependencies:
     babel-polyfill "^6.9.1"
-    lodash "^4.16.4"
     node-uuid "^1.4.7"
     rxjs "^5.0.0-rc.1"
     ws "^1.1.1"
