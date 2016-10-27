@@ -104,9 +104,13 @@ const observables = {
     // someway to embed this into the SQL query?
     const key = keyNameForSocket('chat-identities', socket);
 
-    const sessionToIdentity = database.observable(key, {includeMetadata: true})
-        .map(mapMetadataForServerEvents)
-        .scan((set, event) => Object.assign(set, {[event.sessionId]: event.identityId}), {})
+    const identityEvents = database.observable(key, {includeMetadata: true});
+
+    const sessionToIdentity = batchScan.call(
+          identityEvents,
+          (set, [event, meta]) => Object.assign(set, {[meta.sessionId]: event.identityId}),
+          {}
+    )
 
     return Rx.Observable.combineLatest(
       sessionToIdentity, onlineSessions, reduceToPresenceList
