@@ -5,13 +5,24 @@ import MessageList from './MessageList';
 import FontAwesome from './FontAwesome';
 import Avatar from './Avatar';
 import Link from './Link';
+import InlineEdit from 'react-edit-inline';
 
 
 function ChatNavItem(props) {
   return (
     <li>
       <Avatar iconIndex={props.iconIndex} colorIndex={props.colorIndex} />
-      <span>{props.name}</span>
+      {
+        props.isCurrentUser ? (
+          <InlineEdit
+            text={props.name}
+            change={(e) => props.setName(e.name)}
+            paramName="name"
+          />
+        ) : (
+          <span>{props.name}</span>
+        )
+      }
     </li>
   );
 }
@@ -21,7 +32,13 @@ function ChatNav(props) {
   const style = Object.assign({padding: 0, margin: 0}, props.style)
   return (
     <ul className='chat-nav' style={style}>
-      {props.presence.map((identity, i) => <ChatNavItem key={i} {...identity} />)}
+      {props.presence.map((identity, i) => (
+        <ChatNavItem
+            key={i}
+            setName={props.setName}
+            isCurrentUser={props.currentIdentityId === identity.identityId}
+            {...identity}  />
+      ))}
     </ul>
   );
 }
@@ -187,7 +204,10 @@ class ChatRoom extends React.Component {
         </div>
         <div className='chat-room' style={style.gridContainer}>
           <div style={style.leftColumn}>
-            <ChatNav presence={this.props.presence} style={{flex: 1}}/>
+            <ChatNav presence={this.props.presence}
+                currentIdentityId={this.props.identity.identityId}
+                setName={this.props.setName}
+                style={{flex: 1}} />
             <div style={{height: '57px'}}>
               <Link className='change-name-button' onClick={this.props.onChangeName}>
                 Change your name

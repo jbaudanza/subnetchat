@@ -35,6 +35,7 @@ function getIdentityId() {
 
 function getIdentity() {
   return {
+    identityId: getIdentityId(),
     name: getFromLocalstorage('name', () => pick(words.adjectives) + ' ' + pick(words.animals)),
     colorIndex: parseInt(getFromLocalstorage('colorIndex', () => randomIndex(8))),
     iconIndex: parseInt(getFromLocalstorage('iconIndex', () => randomIndex(8)))
@@ -103,7 +104,7 @@ class ChatApp extends React.Component {
   constructor(props) {
     super(props);
 
-    bindAll(this, 'onSubmitMessage', 'showOverlay', 'hideOverlay', 'setIdentity');
+    bindAll(this, 'onSubmitMessage', 'showOverlay', 'hideOverlay', 'setName', 'setIdentity');
 
     this.state = {
       showOverlay: false
@@ -112,6 +113,15 @@ class ChatApp extends React.Component {
 
   setIdentity(identity) {
     this.hideOverlay();
+    this.setState({identity: identity});
+
+    Object.assign(localStorage, identity);
+
+    this.publishIdentity();
+  }
+
+  setName(name) {
+    const identity = Object.assign({}, this.state.identity, {name})
     this.setState({identity: identity});
 
     Object.assign(localStorage, identity);
@@ -187,7 +197,8 @@ class ChatApp extends React.Component {
     const extraProps = {
       onSubmitMessage: this.onSubmitMessage,
       identity: this.state.identity,
-      onChangeName: this.showOverlay
+      onChangeName: this.showOverlay,
+      setName: this.setName
     };
 
     if (this.state.ipInfo) {
