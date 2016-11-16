@@ -6,21 +6,41 @@ require("babel-register")({
 });
 
 const Rx = require('rxjs');
-const jindo = require('jindo/lib/server');
-const database = require('jindo/lib/server/database');
-const sessions = require('jindo/lib/server/presence').sessions;
-require('jindo/lib/server/snapshotLatest');
-
+const express = require('express');
 const _ = require('lodash');
+
+const PgDatabase = require('rxeventstore/lib/database/pg').default;
+const sessions = require('jindo/lib/server/presence').sessions;
+const processLifecycle = require('jindo/lib/server/process_lifecycle');
+
+const ObservablesServer = require('rxremote/observables_server');
+const PublishingServer = require('rxremote/lib/publishing_server').default;
+
 const channelName = require('./js/channelName').default;
 
-const batchScan = require('rxremote/batches').batchScan;
 
-function mapMetadataForServerEvents(list) {
-  return Object.assign({}, list[0], list[1])
-}
+// TODO: These are duplicated in RxEventStore module. Consolidate this
+// somehow
+function batchedScan(project, seed) {
+  return Rx.Observable.create((observer) => {
+    let baseIndex = 0;
+
+    return this.scan(function(acc, batch) {
+      const result = batch.reduce(function(innerAcc, currentValue, index) {
+        return project(innerAcc, currentValue, baseIndex + index);
+      }, acc);
+
+      baseIndex += batch.length;
+
+      return result;
+    }, seed).subscribe(observer);
+  });
+};
 
 
+const database = new PgDatabase(
+  process.env['DATABASE_URL'] || "postgres://localhost/observables_development"
+);
 
 // Only pull an hours worth of process lifecycle events
 const processFilter = {
@@ -32,12 +52,10 @@ const processFilter = {
 
     [sessionId, sessionId, sessionId, ...]
  */
+
 const onlineSessions = sessions(
-    database
-        .observable('connection-events', {includeMetadata: true})
-        .map(mapMetadataForServerEvents),
+    database.observable('connection-events', {includeMetadata: true}),
     database.observable('process-lifecycle', {includeMetadata: true, filters: processFilter})
-        .map(mapMetadataForServerEvents)
 );
 
 
@@ -77,12 +95,6 @@ function addressForSocket(socket) {
   );
 }
 
-function mapMetadata(list) {
-  const value = list[0];
-  const meta = list[1];
-  return Object.assign({}, value, {timestamp: meta.timestamp, id: meta.id});
-}
-
 function keyNameForSocket(prefix, socket) {
   return keyNameForIp(prefix, addressForSocket(socket))
 }
@@ -92,42 +104,44 @@ function keyNameForIp(prefix, ipAddress) {
 }
 
 const observables = {
-  "chat-messages"(offset, socket) {
+  "chat-messages"(cursor, socket) {
     const key = keyNameForSocket('chat-messages', socket);
+
     return database
-      .observable(key, {offset, includeMetadata: true})
-      .map(mapMetadata);
+      .observable(key, {cursor, includeMetadata: ['timestamp', 'id']});
   },
 
-  "presence"(offset, socket) {
+  "presence"(cursor, socket) {
     // TODO: This is rescanning all the events to look for join events. Is there
     // someway to embed this into the SQL query?
     const key = keyNameForSocket('chat-identities', socket);
 
-    const identityEvents = database.observable(key, {includeMetadata: true});
+    const identityEvents = database.observable(key, {includeMetadata: ['sessionId']});
 
-    const sessionToIdentity = batchScan.call(
+    const sessionToIdentity = batchedScan.call(
           identityEvents,
-          (set, [event, meta]) => Object.assign(set, {[meta.sessionId]: event.identityId}),
+          (set, event) => Object.assign(set, {[event.sessionId]: event.value.identityId}),
           {}
     )
 
     return Rx.Observable.combineLatest(
       sessionToIdentity, onlineSessions, reduceToPresenceList
-    );
+    ).map(value => ({cursor: 0, value: value}));
   },
 
-  "identities"(offset, socket) {
+  "identities"(cursor, socket) {
     const key = keyNameForSocket('chat-identities', socket);
     const observable = database.observable(key);
 
-    return batchScan.call(observable,
+    return batchedScan.call(observable,
       (set, event) => Object.assign(set, {[event.identityId]: event.identity}), {}
-    )
+    ).map(value => ({cursor: 0, value: value}))
   },
 
-  "ip-address"(offset, socket) {
-    return Rx.Observable.of(addressForSocket(socket));
+  "ip-address"(cursor, socket) {
+    return Rx.Observable.of(addressForSocket(socket))
+        .concat(Rx.Observable.never())
+        .map(value => ({cursor: 0, value: value}))
   }
 };
 
@@ -158,7 +172,32 @@ const handlers = {
   }
 };
 
-const app = jindo.start(observables, handlers);
+const app = express();
+app.enable('trust proxy');
+app.use(PublishingServer(handlers, process.env['SECRET']));
+
+const server = app.listen((process.env['PORT'] || 5000), function() {
+  console.log("HTTP server listening to", server.address().port);
+});
+
+function logger(message) {
+  console.log(new Date().toISOString(), message);
+}
+
+
+processLifecycle.log.subscribe(logger);
+
+processLifecycle.startup((event) => (
+  database.insertEvent('process-lifecycle', event)
+));
+
+
+const observablesServer = new ObservablesServer(server, observables);
+observablesServer.log.subscribe(logger);
+observablesServer.events.subscribe(function([event, meta]) {
+  database.insertEvent('connection-events', event, meta);
+});
+
 
 const browserifyOptions = {
   transform: [['babelify', {presets: ["react", 'es2015'], plugins: ['transform-flow-strip-types']}]]
@@ -180,6 +219,5 @@ if (process.env['NODE_ENV'] !== 'production') {
 
 app.use(require('morgan')(logFormat));
 
-const express = require('express');
 app.use(express.static('public'));
 

@@ -1,5 +1,8 @@
 import React from 'react'
 import {bindAll} from 'lodash';
+import Rx from 'rxjs';
+
+require('whatwg-fetch');
 
 import ChatRoom from './ChatRoom';
 import * as words from './words';
@@ -7,6 +10,13 @@ import channelNameFromAddress from './channelName';
 import IdentitySelector from './IdentitySelector'
 import Overlay from './Overlay';
 import uuid from 'node-uuid';
+
+import PublishingClient from 'rxremote/lib/publishing_client';
+import ObservablesClient from 'rxremote/observables_client';
+
+
+const publishingClient = new PublishingClient();
+const observablesClient = new ObservablesClient();
 
 
 function randomIndex(ceil) {
@@ -99,6 +109,15 @@ function addIdentitiesToMessages(messages, identities) {
   });
 }
 
+function logger(key) {
+  return function(value) { console.log(key, value); }
+}
+
+function flattenMessage(msg) {
+  let obj = Object.assign({}, msg.value, msg);
+  delete obj.value;
+  return obj;
+}
 
 class ChatApp extends React.Component {
   constructor(props) {
@@ -136,18 +155,24 @@ class ChatApp extends React.Component {
 
     this.setState({identity: getIdentity()});
 
-    // TODO: restrict to just this subnet
-    const messages = this.props.jindo.observable('chat-messages')
-      .filter((msg) => msg.type === 'chat-message')
-      .scan((list, e) => list.concat(e), [])
+    // TODO. Changes from this observable should resubscribe
+    // the chat-messages, identities, and presence observable.
+    const ipAddress$ = observablesClient.observable('ip-address');
 
-    const identities = this.props.jindo.observable('identities')
+    const messages = ipAddress$.switchMap(() => (
+      observablesClient.observable('chat-messages')
+          .map(batch => batch.map(flattenMessage))
+          .scan((list, e) => list.concat(e), [])
+    ))
+
+    const identities = ipAddress$.switchMap(() => observablesClient.observable('identities'))
 
     const presence = Rx.Observable.combineLatest(
-      this.props.jindo.observable('presence'),
+      ipAddress$.switchMap(() => observablesClient.observable('presence')),
       identities,
       (presenceList, identities) => presenceList.map((id) => identities[id]).filter(x => x)
     ).startWith([]);
+    presence.subscribe(logger('presence'));
 
     const messagesWithIdentity = Rx.Observable.combineLatest(
       messages,
@@ -155,22 +180,21 @@ class ChatApp extends React.Component {
       addIdentitiesToMessages
     ).startWith([]);
 
-    const channelName = this.props.jindo.observable('ip-address')
-        .map(channelNameFromAddress);
+    const channelName$ = ipAddress$.map(channelNameFromAddress);
 
     this.Observer = subscribeToComponent(ChatRoom, {
       messages: messagesWithIdentity,
       presence: presence,
-      connected: this.props.jindo.connected,
-      reconnectingAt: this.props.jindo.reconnectingAt,
-      channelName: channelName
+      connected: observablesClient.connected,
+      reconnectingAt: observablesClient.reconnectingAt,
+      channelName: channelName$
     })
 
     this.publishIdentity();
   }
 
   publishIdentity() {
-    this.props.jindo.publish('chat-identities', {
+    publishingClient.publish('chat-identities', {
       type: 'identify',
       identityId: getIdentityId(),
       identity: getIdentity()
@@ -178,7 +202,7 @@ class ChatApp extends React.Component {
   }
 
   onSubmitMessage(message) {
-    this.props.jindo.publish('chat-messages', {
+    publishingClient.publish('chat-messages', {
       type: 'chat-message',
       body: message,
       identityId: getIdentityId()
@@ -227,9 +251,5 @@ class ChatApp extends React.Component {
     );
   }
 }
-
-ChatApp.propTypes = {
-  jindo: React.PropTypes.object.isRequired
-};
 
 module.exports = ChatApp;

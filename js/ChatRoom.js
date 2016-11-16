@@ -29,7 +29,7 @@ function ChatNavItem(props) {
 
 
 function ChatNav(props) {
-  const style = Object.assign({padding: 0, margin: 0}, props.style)
+  const style = Object.assign({padding: 0, margin: 0}, props.style);
   return (
     <ul className='chat-nav' style={style}>
       {props.presence.map((identity, i) => (
