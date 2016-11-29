@@ -7,7 +7,7 @@
     "node": "6.9.1"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "./node_modules/.bin/mocha --compilers js:babel-core/register",
     "start": "node server.js",
     "postinstall": "./postinstall.sh",
     "prepublish": "node_modules/.bin/babel -d node_modules/rxeventstore/lib node_modules/rxeventstore/src"
@@ -32,13 +32,14 @@
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
     "react-edit-inline": "^1.0.7",
-    "rxeventstore": "jbaudanza/rxeventstore#4a719872",
+    "rxeventstore": "jbaudanza/rxeventstore#2b95f38bd",
     "rxjs": "^5.0.0-rc.1",
     "rxremote": "0.0.7",
     "sass": "^0.5.0",
     "utf-8-validate": "^1.2.1"
   },
   "devDependencies": {
-    "babel-cli": "^6.18.0"
+    "babel-cli": "^6.18.0",
+    "mocha": "^3.2.0"
   }
 }

@@ -10,6 +10,9 @@ const express = require('express');
 const _ = require('lodash');
 
 const PgDatabase = require('rxeventstore/lib/database/pg').default;
+const processId = require('rxeventstore/lib/processId');
+const batchedScan = require('rxeventstore/lib/batches');
+
 const sessions = require('jindo/lib/server/presence').sessions;
 const processLifecycle = require('jindo/lib/server/process_lifecycle');
 
@@ -17,26 +20,6 @@ const ObservablesServer = require('rxremote/observables_server');
 const PublishingServer = require('rxremote/lib/publishing_server').default;
 
 const channelName = require('./js/channelName').default;
-
-
-// TODO: These are duplicated in RxEventStore module. Consolidate this
-// somehow
-function batchedScan(project, seed) {
-  return Rx.Observable.create((observer) => {
-    let baseIndex = 0;
-
-    return this.scan(function(acc, batch) {
-      const result = batch.reduce(function(innerAcc, currentValue, index) {
-        return project(innerAcc, currentValue, baseIndex + index);
-      }, acc);
-
-      baseIndex += batch.length;
-
-      return result;
-    }, seed).subscribe(observer);
-  });
-};
-
 
 const database = new PgDatabase(
   process.env['DATABASE_URL'] || "postgres://localhost/observables_development"
@@ -57,7 +40,6 @@ const onlineSessions = sessions(
     database.observable('connection-events', {includeMetadata: true}),
     database.observable('process-lifecycle', {includeMetadata: true, filters: processFilter})
 );
-
 
 // This is a set of any identity that has ever been seen.
 /*
@@ -122,7 +104,7 @@ const observables = {
           identityEvents,
           (set, event) => Object.assign(set, {[event.sessionId]: event.value.identityId}),
           {}
-    )
+    );
 
     return Rx.Observable.combineLatest(
       sessionToIdentity, onlineSessions, reduceToPresenceList
@@ -135,7 +117,7 @@ const observables = {
 
     return batchedScan.call(observable,
       (set, event) => Object.assign(set, {[event.identityId]: event.identity}), {}
-    ).map(value => ({cursor: 0, value: value}))
+    ).map(value => ({cursor: 0, value: value}));
   },
 
   "ip-address"(cursor, socket) {
@@ -184,9 +166,9 @@ function logger(message) {
   console.log(new Date().toISOString(), message);
 }
 
-
 processLifecycle.log.subscribe(logger);
 
+logger('processId: ' + processId);
 processLifecycle.startup((event) => (
   database.insertEvent('process-lifecycle', event)
 ));
