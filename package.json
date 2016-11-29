@@ -24,7 +24,6 @@
     "browserify": "^13.0.1",
     "browserify-middleware": "^7.0.0",
     "ip-address": "^5.8.2",
-    "jindo": "jbaudanza/jindo#8c9208e2",
     "linkify": "jbaudanza/javascript-linkify",
     "morgan": "^1.7.0",
     "node-bourbon": "^4.2.8",

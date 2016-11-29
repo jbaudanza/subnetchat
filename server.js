@@ -11,10 +11,10 @@ const _ = require('lodash');
 
 const PgDatabase = require('rxeventstore/lib/database/pg').default;
 const processId = require('rxeventstore/lib/processId');
-const batchedScan = require('rxeventstore/lib/batches');
+const {batchedScan} = require('rxeventstore/lib/batches');
 
-const sessions = require('jindo/lib/server/presence').sessions;
-const processLifecycle = require('jindo/lib/server/process_lifecycle');
+const {sessionsOnline} = require('./sessions_online');
+const processLifecycle = require('./process_lifecycle');
 
 const ObservablesServer = require('rxremote/observables_server');
 const PublishingServer = require('rxremote/lib/publishing_server').default;
@@ -24,41 +24,6 @@ const channelName = require('./js/channelName').default;
 const database = new PgDatabase(
   process.env['DATABASE_URL'] || "postgres://localhost/observables_development"
 );
-
-// Only pull an hours worth of process lifecycle events
-const processFilter = {
-  timestamp: {$gt: new Date(Date.now() - 60 * 60 * 1000)}
-};
-
-/*
-   This is a list of all session ids that are currently online. It looks like:
-
-    [sessionId, sessionId, sessionId, ...]
- */
-
-const onlineSessions = sessions(
-    database.observable('connection-events', {includeMetadata: true}),
-    database.observable('process-lifecycle', {includeMetadata: true, filters: processFilter})
-);
-
-// This is a set of any identity that has ever been seen.
-/*
-  This could be a behavior subject. How would new events be fed in?
-    - A designated worker?
-    - The server that receives the identity event will update the subject
-  How do you stop from re-ingesting the same events?
-
-  There's two strategies for reducing state.
-   - generate on read
-      - use a ReplaySubject and snapshotLatest()
-      - Maybe snapshotLatest takes a subject or observer/observable pair
-   - generate on write
-      - use a BehaviorSubject and recalculate on write. (How to deal with write conflicts?)
-   - consider how you would solve these problems in a traditional relational-db? how
-     do those solutions map onto observable patterns?
-*/
-//const identities = database.observable('chat-identities')
-//  .scan((set, event) => Object.assign(set, {[event.identityId]: event.identity}), {});
 
 
 function reduceToPresenceList(sessionToIdentity, sessionIds) {
@@ -169,9 +134,17 @@ function logger(message) {
 processLifecycle.log.subscribe(logger);
 
 logger('processId: ' + processId);
-processLifecycle.startup((event) => (
-  database.insertEvent('process-lifecycle', event)
-));
+const processesOnline = processLifecycle.startup(database);
+
+
+/*
+   This is a list of all session ids that are currently online. It looks like:
+    [sessionId, sessionId, sessionId, ...]
+ */
+const onlineSessions = sessionsOnline(
+    database.observable('connection-events', {includeMetadata: true}),
+    processesOnline
+);
 
 
 const observablesServer = new ObservablesServer(server, observables);
