@@ -22,8 +22,15 @@ const PublishingServer = require('rxremote/lib/publishing_server').default;
 const channelName = require('./js/channelName').default;
 
 const database = new PgDatabase(
-  process.env['DATABASE_URL'] || "postgres://localhost/observables_development"
+  process.env['DATABASE_URL'] || "postgres://localhost/subnetchat_development"
 );
+
+const loggerSubject = new Rx.Subject();
+
+const projections = require('./projections');
+projections.run(database, loggerSubject);
+projections.processesOnline.subscribe(x => console.log('processes', x));
+projections.sessionsOnline.subscribe(x => console.log('sessions', x));
 
 
 function reduceToPresenceList(sessionToIdentity, sessionIds) {
@@ -52,18 +59,25 @@ function keyNameForIp(prefix, ipAddress) {
 
 const observables = {
   "chat-messages"(cursor, socket) {
-    const key = keyNameForSocket('chat-messages', socket);
+    const aggregateRoot = channelName(addressForSocket(socket));
 
     return database
-      .observable(key, {cursor, includeMetadata: ['timestamp', 'id']});
+      .observable('chat-messages', {
+        cursor: cursor,
+        includeMetadata: ['timestamp', 'id'],
+        filters: {aggregateRoot}
+    });
   },
 
   "presence"(cursor, socket) {
     // TODO: This is rescanning all the events to look for join events. Is there
     // someway to embed this into the SQL query?
-    const key = keyNameForSocket('chat-identities', socket);
+    const aggregateRoot = channelName(addressForSocket(socket));
 
-    const identityEvents = database.observable(key, {includeMetadata: ['sessionId']});
+    const identityEvents = database.observable('chat-identities', {
+      includeMetadata: ['sessionId'],
+      filters: {aggregateRoot}
+    });
 
     const sessionToIdentity = batchedScan.call(
           identityEvents,
@@ -72,13 +86,13 @@ const observables = {
     );
 
     return Rx.Observable.combineLatest(
-      sessionToIdentity, onlineSessions, reduceToPresenceList
-    ).map(value => ({cursor: 0, value: value}));
+      sessionToIdentity, projections.sessionsOnline, reduceToPresenceList
+    ).map(value => ({cursor: 0, value: value}))
   },
 
   "identities"(cursor, socket) {
-    const key = keyNameForSocket('chat-identities', socket);
-    const observable = database.observable(key);
+    const aggregateRoot = channelName(addressForSocket(socket));
+    const observable = database.observable('chat-identities', {filters: {aggregateRoot}});
 
     return batchedScan.call(observable,
       (set, event) => Object.assign(set, {[event.identityId]: event.identity}), {}
@@ -103,7 +117,10 @@ const windowSize = '10 seconds';
 
 const handlers = {
   'chat-identities'(value, metadata) {
-    const key = keyNameForIp('chat-identities', metadata.ipAddress);
+    const aggregateRoot = channelName(metadata.ipAddress);
+
+    metadata = Object.assign({}, metadata, {aggregateRoot});
+    const key = 'chat-identities';
 
     return database.throttled({ipAddress: metadata.ipAddress, key: key}, windowSize, limit,
         () => database.insertEvent(key, value, metadata)
@@ -111,7 +128,10 @@ const handlers = {
   },
 
   'chat-messages'(value, metadata) {
-    const key = keyNameForIp('chat-messages', metadata.ipAddress);
+    const aggregateRoot = channelName(metadata.ipAddress);
+
+    metadata = Object.assign({}, metadata, {aggregateRoot});
+    const key = 'chat-messages';
 
     return database.throttled({ipAddress: metadata.ipAddress, key: key}, windowSize, limit,
         () => database.insertEvent(key, value, metadata)
@@ -131,20 +151,12 @@ function logger(message) {
   console.log(new Date().toISOString(), message);
 }
 
+loggerSubject.subscribe(logger);
 processLifecycle.log.subscribe(logger);
 
+
 logger('processId: ' + processId);
-const processesOnline = processLifecycle.startup(database);
-
-
-/*
-   This is a list of all session ids that are currently online. It looks like:
-    [sessionId, sessionId, sessionId, ...]
- */
-const onlineSessions = sessionsOnline(
-    database.observable('connection-events', {includeMetadata: true}),
-    processesOnline
-);
+processLifecycle.startup(database);
 
 
 const observablesServer = new ObservablesServer(server, observables);
