@@ -1,5 +1,5 @@
 import Rx from 'rxjs';
-import {flatten} from 'lodash';
+import {flatten, mapValues} from 'lodash';
 
 import RedisDatabase from 'rxeventstore/lib/database/redis';
 
@@ -21,6 +21,40 @@ const filters = {
 };
 
 
+function resumeChatIdentityEvents(driver, cursor) {
+  return driver
+      .observable('chat-identities', {
+          cursor: cursor, includeMetadata: ['aggregateRoot', 'sessionId']
+      })
+      .map(function(batch) {
+        const ops = [];
+
+        batch.value.forEach(function(event) {
+          const key = 'chat-identities:' + event.aggregateRoot;
+          ops.push(
+            [
+              'hset',
+              key,
+              event.value.identityId,
+              JSON.stringify(event.value.identity)
+            ],
+            [
+              'hset',
+              'identities-by-session:' + event.aggregateRoot,
+              event.sessionId,
+              event.value.identityId
+            ]
+          );
+        });
+
+        return {
+          cursor: batch.cursor,
+          value: ops
+        };
+      });
+}
+
+
 function resumeProcessEvents(driver, cursor) {
   return driver
     .observable('process-lifecycle', {
@@ -35,8 +69,10 @@ function resumeProcessEvents(driver, cursor) {
         switch (event.value) {
           case 'startup':
           case 'heartbeat':
-            ops.push(['zadd', 'process-ids', event.timestamp.getTime(), event.processId]);
-            ops.push(['expire', keyForSessionsSet(event.processId), EXPIRE_AFTER_SECONDS]);
+            ops.push(
+              ['zadd', 'process-ids', event.timestamp.getTime(), event.processId],
+              ['expire', keyForSessionsSet(event.processId), EXPIRE_AFTER_SECONDS]
+            );
             break;
           case 'shutdown':
             ops.push(['zrem', 'process-ids', event.processId]);
@@ -70,8 +106,10 @@ function resumeConnectionEvents(driver, cursor) {
         if (event.sessionId) {
           switch (event.value) {
             case 'connection-open':
-              ops.push(['sadd', key, event.sessionId]);
-              ops.push(['expire', key, EXPIRE_AFTER_SECONDS]);
+              ops.push(
+                  ['sadd', key, event.sessionId],
+                  ['expire', key, EXPIRE_AFTER_SECONDS]
+              );
               break;
             case 'connection-closed':
               ops.push(['srem', key, event.sessionId]);
@@ -90,16 +128,20 @@ function resumeConnectionEvents(driver, cursor) {
 export function run(driver, logger) {
   redis.runProjection('process-ids', resumeProcessEvents.bind(null, driver), logger);
   redis.runProjection('session-ids', resumeConnectionEvents.bind(null, driver), logger);
+  redis.runProjection('chat-identities', resumeChatIdentityEvents.bind(null, driver), logger);
 }
+
 
 function getProcessesOnline() {
   return redis.clients.global.zrange('process-ids', 0, -1);
 }
 
+
 export const processesOnline = redis.channel('process-ids').switchMap(function() {
   redis.clients.global.zremrangebyscore('process-ids', '-inf', earliestTimetamp());
   return getProcessesOnline();
 });
+
 
 export const sessionsOnline = processesOnline.switchMap(function(processIds) {
   if (processIds.length > 0) {
@@ -113,3 +155,20 @@ export const sessionsOnline = processesOnline.switchMap(function(processIds) {
     return Rx.Observable.of([]);
   }
 });
+
+
+export function identitiesBySession(channelName) {
+  const key = 'identities-by-session:' + channelName;
+  return redis
+    .channel(key)
+    .switchMap(() => redis.clients.global.hgetall(key));
+}
+
+export function identitiesForChatRoom(channelName) {
+  const key = 'chat-identities:' + channelName;
+  return redis.channel(key).switchMap(function() {
+    return redis.clients.global
+        .hgetall(key)
+        .then((obj) => mapValues(obj, JSON.parse));
+  });
+}

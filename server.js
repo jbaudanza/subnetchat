@@ -70,33 +70,19 @@ const observables = {
   },
 
   "presence"(cursor, socket) {
-    // TODO: This is rescanning all the events to look for join events. Is there
-    // someway to embed this into the SQL query?
     const aggregateRoot = channelName(addressForSocket(socket));
 
-    const identityEvents = database.observable('chat-identities', {
-      includeMetadata: ['sessionId'],
-      filters: {aggregateRoot}
-    });
-
-    const sessionToIdentity = batchedScan.call(
-          identityEvents,
-          (set, event) => Object.assign(set, {[event.sessionId]: event.value.identityId}),
-          {}
-    );
-
     return Rx.Observable.combineLatest(
-      sessionToIdentity, projections.sessionsOnline, reduceToPresenceList
-    ).map(value => ({cursor: 0, value: value}))
+        projections.identitiesBySession(aggregateRoot),
+        projections.sessionsOnline,
+        reduceToPresenceList
+    ).map(value => ({cursor: 0, value: value}));
   },
 
   "identities"(cursor, socket) {
-    const aggregateRoot = channelName(addressForSocket(socket));
-    const observable = database.observable('chat-identities', {filters: {aggregateRoot}});
-
-    return batchedScan.call(observable,
-      (set, event) => Object.assign(set, {[event.identityId]: event.identity}), {}
-    ).map(value => ({cursor: 0, value: value}));
+    return projections
+        .identitiesForChatRoom(channelName(addressForSocket(socket)))
+        .map(value => ({cursor: 0, value: value}));
   },
 
   "ip-address"(cursor, socket) {
