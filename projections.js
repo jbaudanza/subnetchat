@@ -1,5 +1,5 @@
 import Rx from 'rxjs';
-import {flatten, mapValues} from 'lodash';
+import {flatten, mapValues, identity, uniq} from 'lodash';
 
 import RedisDatabase from 'rxeventstore/lib/database/redis';
 
@@ -157,13 +157,6 @@ export const sessionsOnline = processesOnline.switchMap(function(processIds) {
 });
 
 
-export function identitiesBySession(channelName) {
-  const key = 'identities-by-session:' + channelName;
-  return redis
-    .channel(key)
-    .switchMap(() => redis.clients.global.hgetall(key));
-}
-
 export function identitiesForChatRoom(channelName) {
   const key = 'chat-identities:' + channelName;
   return redis.channel(key).switchMap(function() {
@@ -171,4 +164,14 @@ export function identitiesForChatRoom(channelName) {
         .hgetall(key)
         .then((obj) => mapValues(obj, JSON.parse));
   });
+}
+
+export function presenceForChatRoom(channelName) {
+  const key = 'identities-by-session:' + channelName;
+
+  return Rx.Observable.combineLatest(
+    sessionsOnline,
+    redis.channel(key),
+    (sessionIds) => redis.clients.global.hmget(key, ...sessionIds)
+  ).switchMap(identity).map(uniq);
 }

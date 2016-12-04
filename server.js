@@ -33,15 +33,6 @@ projections.processesOnline.subscribe(x => console.log('processes', x));
 projections.sessionsOnline.subscribe(x => console.log('sessions', x));
 
 
-function reduceToPresenceList(sessionToIdentity, sessionIds) {
-  return _.chain(sessionToIdentity)
-    .pick(sessionIds)
-    .values()
-    .uniq()
-    .value();
-}
-
-
 function addressForSocket(socket) {
   return (
     socket.upgradeReq.headers['x-forwarded-for'] ||
@@ -72,11 +63,9 @@ const observables = {
   "presence"(cursor, socket) {
     const aggregateRoot = channelName(addressForSocket(socket));
 
-    return Rx.Observable.combineLatest(
-        projections.identitiesBySession(aggregateRoot),
-        projections.sessionsOnline,
-        reduceToPresenceList
-    ).map(value => ({cursor: 0, value: value}));
+    return projections
+        .presenceForChatRoom(aggregateRoot)
+        .map(value => ({cursor: 0, value: value}))
   },
 
   "identities"(cursor, socket) {
