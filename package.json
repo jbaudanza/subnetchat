@@ -9,8 +9,7 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha --compilers js:babel-core/register",
     "start": "node server.js",
-    "postinstall": "./postinstall.sh",
-    "prepublish": "node_modules/.bin/babel -d node_modules/rxeventstore/lib node_modules/rxeventstore/src"
+    "postinstall": "./postinstall.sh"
   },
   "author": "",
   "license": "ISC",
@@ -32,7 +31,7 @@
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
     "react-edit-inline": "^1.0.7",
-    "rxeventstore": "jbaudanza/rxeventstore#3013dfe9786",
+    "rxeventstore": "^0.0.13",
     "rxjs": "5.0.0-rc.5",
     "rxremote": "0.0.7",
     "sass": "^0.5.0",

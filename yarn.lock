@@ -3330,9 +3330,9 @@ ripemd160@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/ripemd160/-/ripemd160-1.0.1.tgz#93a4bbd4942bc574b69a8fa57c71de10ecca7d6e"
 
-rxeventstore@jbaudanza/rxeventstore#3013dfe9786:
-  version "0.0.12"
-  resolved "https://codeload.github.com/jbaudanza/rxeventstore/tar.gz/3013dfe9786"
+rxeventstore:
+  version "0.0.13"
+  resolved "https://registry.yarnpkg.com/rxeventstore/-/rxeventstore-0.0.13.tgz#a21c566de6daab3ae2dff2c6ec28532a47f90338"
   dependencies:
     babel-polyfill "^6.9.1"
     generic-pool "^3.1.1"
@@ -3340,7 +3340,7 @@ rxeventstore@jbaudanza/rxeventstore#3013dfe9786:
     pg "^6.1.0"
     pg-pool "^1.5.0"
     redis "^2.6.3"
-    rxjs "5.0.0-rc.2"
+    rxjs "5.0.0-rc.5"
 
 rxjs@5.0.0-rc.2:
   version "5.0.0-rc.2"
