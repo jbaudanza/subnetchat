@@ -1,7 +1,7 @@
 import Rx from 'rxjs';
 import {flatten, mapValues, identity, uniq} from 'lodash';
 
-import RedisDatabase from 'rxeventstore/lib/database/redis';
+import RedisDatabase from 'rxeventstore/redis';
 
 const redis = new RedisDatabase(
     process.env['REDISCLOUD_URL'] ||

@@ -31,7 +31,7 @@
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
     "react-edit-inline": "^1.0.7",
-    "rxeventstore": "^0.0.13",
+    "rxeventstore": "0.0.14",
     "rxjs": "5.0.0-rc.5",
     "rxremote": "0.0.7",
     "sass": "^0.5.0",

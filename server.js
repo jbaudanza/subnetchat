@@ -9,8 +9,7 @@ const Rx = require('rxjs');
 const express = require('express');
 const _ = require('lodash');
 
-const PgDatabase = require('rxeventstore/lib/database/pg').default;
-const processId = require('rxeventstore/lib/processId');
+const PgDatabase = require('rxeventstore/pg');
 const {batchedScan} = require('rxeventstore/lib/batches');
 
 const {sessionsOnline} = require('./sessions_online');
@@ -130,7 +129,6 @@ loggerSubject.subscribe(logger);
 processLifecycle.log.subscribe(logger);
 
 
-logger('processId: ' + processId);
 processLifecycle.startup(database);
 
 

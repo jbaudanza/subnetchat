@@ -3330,9 +3330,9 @@ ripemd160@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/ripemd160/-/ripemd160-1.0.1.tgz#93a4bbd4942bc574b69a8fa57c71de10ecca7d6e"
 
-rxeventstore:
-  version "0.0.13"
-  resolved "https://registry.yarnpkg.com/rxeventstore/-/rxeventstore-0.0.13.tgz#a21c566de6daab3ae2dff2c6ec28532a47f90338"
+rxeventstore@0.0.14:
+  version "0.0.14"
+  resolved "https://registry.yarnpkg.com/rxeventstore/-/rxeventstore-0.0.14.tgz#eec433351a8549395b8fb680b1008e2465b7e4c2"
   dependencies:
     babel-polyfill "^6.9.1"
     generic-pool "^3.1.1"
