@@ -4,7 +4,7 @@ import React from 'react';
 function Avatar(props) {
   return (
     <div className='avatar' style={{backgroundColor: colors[props.colorIndex]}}>
-      {icons[props.iconIndex]}
+      {React.cloneElement(icons[props.iconIndex], {fill: 'white'})}
     </div>
   );
 }
@@ -22,24 +22,10 @@ const svgIds = [
 ];
 
 export const icons = svgIds.map((id) => (
-  <svg viewBox="0 0 100 100" version="1.1" x="0px" y="0px">
+  <svg width="35px" height="35px" version="1.1">
     <use xlinkHref={id} />
   </svg>
 ));
-
-// export const icons = [
-//   71,   // sunglasses
-//   73,   // eyes
-//   83,   // coffee
-//   87,   // panda
-//   109,  // skateboard
-//   110,  // pin
-//   121,  // rose
-//   114   // lightning
-// ].map((charCode) => (
-//   <span className='avatar-icon'>{String.fromCharCode(charCode)}</span>
-// ));
-
 
 export const colors = [
   '#913CCD', // purple

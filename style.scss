@@ -12,11 +12,6 @@ body {
   color: $black;
 }
 
-@font-face {
-  font-family: KoolDing;
-  src: url(koolding.ttf);
-}
-
 @mixin buttonize($background-color) {
   display: inline-block;
   border-radius: 7px;
@@ -58,11 +53,6 @@ body {
   line-height: 35px;
   padding-top: 2px;
   box-sizing: border-box;
-}
-
-.avatar-icon {
-  font-size: 150%;
-  font-family: KoolDing;
 }
 
 ul.chat-nav li {
@@ -175,7 +165,6 @@ header {
 
 .icon-picker > a {
   border: 1px solid #eee;
-  padding-top: 3px;
 }
 
 .identity-selector {
