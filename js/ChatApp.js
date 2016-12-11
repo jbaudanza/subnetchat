@@ -5,6 +5,7 @@ import Rx from 'rxjs';
 require('whatwg-fetch');
 
 import ChatRoom from './ChatRoom';
+import SvgAssets from './SvgAssets'
 import * as words from './words';
 import channelNameFromAddress from './channelName';
 import IdentitySelector from './IdentitySelector'
@@ -245,6 +246,7 @@ class ChatApp extends React.Component {
 
     return (
       <div>
+        <SvgAssets />
         {overlay}
         <this.Observer {...extraProps} />
       </div>
