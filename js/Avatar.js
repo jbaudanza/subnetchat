@@ -16,9 +16,8 @@ const svgIds = [
   '#bear',
   '#guitar',
   '#bicycle',
-  '#top-hat',
-  '#dumbbell',
-  '#high-heel'
+  '#high-heel',
+  '#coffee-cup'
 ];
 
 export const icons = svgIds.map((id) => (
