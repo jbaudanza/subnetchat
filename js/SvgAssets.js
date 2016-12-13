@@ -1,9 +1,5 @@
 import React from 'react';
 
-// TODO: 
-//  - lego-man has some hard-coded black colors
-//  - icons need some padding
-
 /**
  To add a new SVG
   - Change the root <svg> to a <symbol> and add an id.

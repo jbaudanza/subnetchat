@@ -3330,9 +3330,9 @@ ripemd160@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/ripemd160/-/ripemd160-1.0.1.tgz#93a4bbd4942bc574b69a8fa57c71de10ecca7d6e"
 
-rxeventstore@0.0.14:
-  version "0.0.14"
-  resolved "https://registry.yarnpkg.com/rxeventstore/-/rxeventstore-0.0.14.tgz#eec433351a8549395b8fb680b1008e2465b7e4c2"
+rxeventstore:
+  version "0.0.15"
+  resolved "https://registry.yarnpkg.com/rxeventstore/-/rxeventstore-0.0.15.tgz#85e94e5f4d4a0c3a4a60985b4fe5fadb73fc210e"
   dependencies:
     babel-polyfill "^6.9.1"
     generic-pool "^3.1.1"
@@ -3340,37 +3340,25 @@ rxeventstore@0.0.14:
     pg "^6.1.0"
     pg-pool "^1.5.0"
     redis "^2.6.3"
-    rxjs "5.0.0-rc.5"
+    rxjs "^5.0.0"
 
-rxjs@5.0.0-rc.2:
-  version "5.0.0-rc.2"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.0.0-rc.2.tgz#d38206f50eeb1e77b0832a74c1c2adeeed5ec2b7"
-  dependencies:
-    symbol-observable "^1.0.1"
-
-rxjs@5.0.0-rc.5:
-  version "5.0.0-rc.5"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.0.0-rc.5.tgz#8cbd17fc242a54c07ef9116da23b0ec8e7d5cea9"
-  dependencies:
-    symbol-observable "^1.0.1"
-
-rxjs@5.0.1:
+rxjs@^5.0.0, rxjs@5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.0.1.tgz#3a69bdf9f0ca0a986303370d4708f72bdfac8356"
   dependencies:
     symbol-observable "^1.0.1"
 
-rxremote@0.0.7:
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/rxremote/-/rxremote-0.0.7.tgz#3c51880520aa147a3b2b839cbef5bae5d3a9c773"
+rxremote:
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/rxremote/-/rxremote-0.0.8.tgz#f53d28b9874d6b8bfa97b1ad5d3b91b589ffc2b3"
   dependencies:
     babel-polyfill "^6.9.1"
     body-parser "^1.15.2"
     express "^4.14.0"
     fetch-ponyfill "^3.0.2"
     jsonwebtoken "^7.1.9"
-    node-uuid "^1.4.7"
-    rxjs "5.0.0-rc.2"
+    rxjs "^5.0.0"
+    uuid "^3.0.0"
     ws "^1.1.1"
 
 sass-graph@^2.1.1:
@@ -3771,6 +3759,10 @@ util@~0.10.1, util@0.10.3:
 utils-merge@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.0.tgz#0294fb922bb9375153541c4f7096231f287c8af8"
+
+uuid@^3.0.0:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.0.1.tgz#6544bba2dfda8c1cf17e629a3a305e2bb1fee6c1"
 
 v8flags@^2.0.10:
   version "2.0.11"
