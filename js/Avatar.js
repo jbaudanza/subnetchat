@@ -4,7 +4,7 @@ import React from 'react';
 function Avatar(props) {
   return (
     <div className='avatar' style={{backgroundColor: colors[props.colorIndex]}}>
-      {React.cloneElement(icons[props.iconIndex], {fill: 'white'})}
+      {React.cloneElement(icons[props.iconIndex], {fill: 'white', stroke: 'white'})}
     </div>
   );
 }

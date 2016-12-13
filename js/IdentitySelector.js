@@ -82,7 +82,7 @@ class IdentitySelector extends React.Component {
             </BoxPicker>
 
             <BoxPicker className='icon-picker' selectedIndex={this.state.iconIndex} onChange={this.setIconIndex}>
-              {icons.map((icon, i) => React.cloneElement(icon, {key: i}))}
+              {icons.map((icon, i) => React.cloneElement(icon, {key: i, fill: 'black', stroke: 'black'}))}
             </BoxPicker>
           </div>
 
