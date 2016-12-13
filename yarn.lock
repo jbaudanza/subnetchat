@@ -3354,6 +3354,12 @@ rxjs@5.0.0-rc.5:
   dependencies:
     symbol-observable "^1.0.1"
 
+rxjs@5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.0.1.tgz#3a69bdf9f0ca0a986303370d4708f72bdfac8356"
+  dependencies:
+    symbol-observable "^1.0.1"
+
 rxremote@0.0.7:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/rxremote/-/rxremote-0.0.7.tgz#3c51880520aa147a3b2b839cbef5bae5d3a9c773"
