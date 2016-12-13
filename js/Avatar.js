@@ -22,7 +22,7 @@ const svgIds = [
 ];
 
 export const icons = svgIds.map((id) => (
-  <svg width="35px" height="35px" version="1.1">
+  <svg width="33px" height="33px" version="1.1">
     <use xlinkHref={id} />
   </svg>
 ));

@@ -16,7 +16,7 @@ function BoxPicker(props) {
     {
       React.Children.map(props.children, (child, i) => (
         <Link key={i}
-           className={(i === props.selectedIndex ? ' active' : null)}
+           className={(i === props.selectedIndex ? 'selected' : null)}
            onClick={props.onChange.bind(null, i)}>
               {child}
         </Link>
@@ -72,7 +72,7 @@ class IdentitySelector extends React.Component {
         <div className='picker-wrapper' id='change-avatar'>
           <Avatar iconIndex={this.state.iconIndex} colorIndex={this.state.colorIndex} />
           <div className='options'>
-            <BoxPicker selectedIndex={this.state.colorIndex} onChange={this.setColorIndex}>
+            <BoxPicker className='color-picker' selectedIndex={this.state.colorIndex} onChange={this.setColorIndex}>
             {
               colors.map((color, i) => (
                 <div key={i} style={{backgroundColor: color, height: '100%', width: '100%'}}>
