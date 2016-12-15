@@ -165,7 +165,7 @@ class ChatApp extends React.Component {
   }
 
   componentWillMount() {
-    window.fetch("http://ipinfo.io/json")
+    window.fetch("https://ipinfo.io/json")
       .then(r => r.json())
       .then(r => this.setState({ipInfo: r}));
 
