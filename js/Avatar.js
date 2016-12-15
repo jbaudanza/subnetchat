@@ -2,14 +2,24 @@ import React from 'react';
 
 
 function Avatar(props) {
+  const iconId = (props.iconId || iconIds[props.iconIndex]);
   return (
     <div className='avatar' style={{backgroundColor: colors[props.colorIndex]}}>
-      {React.cloneElement(icons[props.iconIndex], {fill: 'white', stroke: 'white'})}
+      <Icon iconId={iconId} color='white' />
     </div>
   );
 }
 
-const svgIds = [
+// Props: {id, color}
+export function Icon(props) {
+  return (
+    <svg width="31px" height="31px" version="1.1" style={{margin: 1}} fill={props.color} stroke={props.color}>
+      <use xlinkHref={props.iconId} />
+    </svg>
+  );
+}
+
+export const iconIds = [
   '#poop',
   '#lego-man',
   '#apple',
@@ -19,12 +29,6 @@ const svgIds = [
   '#high-heel',
   '#coffee-cup'
 ];
-
-export const icons = svgIds.map((id) => (
-  <svg width="31px" height="31px" version="1.1" style={{margin: 1}}>
-    <use xlinkHref={id} />
-  </svg>
-));
 
 export const colors = [
   '#913CCD', // purple

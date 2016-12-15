@@ -172,6 +172,13 @@ export function presenceForChatRoom(channelName) {
   return Rx.Observable.combineLatest(
     sessionsOnline,
     redis.channel(key),
-    (sessionIds) => redis.clients.global.hmget(key, ...sessionIds)
+    function(sessionIds) {
+      if (sessionIds.length === 0) {
+        console.warn(key, "sessionId list is empty.")
+        return [];
+      } else {
+        return redis.clients.global.hmget(key, ...sessionIds);
+      }
+    }
   ).switchMap(identity).map(uniq);
 }

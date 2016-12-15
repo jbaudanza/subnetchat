@@ -2,7 +2,7 @@ import React from 'react';
 import {bindAll} from 'lodash';
 
 import Avatar from './Avatar';
-import {icons, colors} from './Avatar';
+import {iconIds, colors, Icon} from './Avatar';
 import Link from './Link';
 
 
@@ -82,7 +82,7 @@ class IdentitySelector extends React.Component {
             </BoxPicker>
 
             <BoxPicker className='icon-picker' selectedIndex={this.state.iconIndex} onChange={this.setIconIndex}>
-              {icons.map((icon, i) => React.cloneElement(icon, {key: i, fill: 'black', stroke: 'black'}))}
+              {iconIds.map((id, i) => <Icon iconId={id} color='black' />)}
             </BoxPicker>
           </div>
 

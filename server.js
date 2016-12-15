@@ -28,8 +28,6 @@ const loggerSubject = new Rx.Subject();
 
 const projections = require('./projections');
 projections.run(database, loggerSubject);
-projections.processesOnline.subscribe(x => console.log('processes', x));
-projections.sessionsOnline.subscribe(x => console.log('sessions', x));
 
 
 function addressForSocket(socket) {

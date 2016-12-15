@@ -1,5 +1,5 @@
 import React from 'react'
-import {bindAll} from 'lodash';
+import {bindAll, first} from 'lodash';
 import Rx from 'rxjs';
 
 require('whatwg-fetch');
@@ -53,7 +53,7 @@ function getIdentity() {
   };
 }
 
-function subscribeToComponent(Component, observables) {
+function wrapSubscriberComponent(Component, observables) {
   return class ReactObserver extends React.Component {
     constructor(props) {
       super(props);
@@ -85,6 +85,9 @@ function subscribeToComponent(Component, observables) {
 
 function addIdentitiesToMessages(messages, identities) {
   return messages.map(function(msg) {
+    if ('identity' in msg)
+      return msg;
+
     let identity;
 
     if ('identityId' in msg) {
@@ -94,7 +97,7 @@ function addIdentitiesToMessages(messages, identities) {
         console.warn('Identity not found for ' + msg.identityId);
       }
     } else {
-      console.warn('Message is missing identityId', message);
+      console.warn('Message is missing identityId', msg);
     }
 
     if (!identity) {
@@ -110,14 +113,26 @@ function addIdentitiesToMessages(messages, identities) {
   });
 }
 
-function logger(key) {
-  return function(value) { console.log(key, value); }
-}
-
 function flattenMessage(msg) {
   let obj = Object.assign({}, msg.value, msg);
   delete obj.value;
   return obj;
+}
+
+
+function extendWithHelperBot(list, channelName) {
+  const welcomeMessage = `Welcome to subnetchat.com! This chat room is only accessible to people on your local subnet. Your subnet refers to the network of computers that are directly connected to you. This could be your office, school, or neighborhood block. Messages in this chat room will only be visible to people with an IP address that starts with ${channelName}.`;
+
+  return [{
+    body: welcomeMessage,
+    timestamp: (list.length > 0) ? first(list).timestamp : (new Date().toISOString()),
+    identity: {
+      iconId: '#info',
+      colorIndex: 6,
+      name: 'Helper Bot'
+    },
+    id: 0
+  }].concat(list);
 }
 
 class ChatApp extends React.Component {
@@ -156,14 +171,13 @@ class ChatApp extends React.Component {
 
     this.setState({identity: getIdentity()});
 
-    // TODO. Changes from this observable should resubscribe
-    // the chat-messages, identities, and presence observable.
     const ipAddress$ = observablesClient.observable('ip-address');
 
-    const messages = ipAddress$.switchMap(() => (
+    const messages = ipAddress$.switchMap((ipAddress) => (
       observablesClient.observable('chat-messages')
           .map(batch => batch.map(flattenMessage))
           .scan((list, e) => list.concat(e), [])
+          .map(list => extendWithHelperBot(list, channelNameFromAddress(ipAddress)))
     ))
 
     const identities = ipAddress$.switchMap(() => observablesClient.observable('identities'))
@@ -173,7 +187,6 @@ class ChatApp extends React.Component {
       identities,
       (presenceList, identities) => presenceList.map((id) => identities[id]).filter(x => x)
     ).startWith([]);
-    presence.subscribe(logger('presence'));
 
     const messagesWithIdentity = Rx.Observable.combineLatest(
       messages,
@@ -183,7 +196,7 @@ class ChatApp extends React.Component {
 
     const channelName$ = ipAddress$.map(channelNameFromAddress);
 
-    this.Observer = subscribeToComponent(ChatRoom, {
+    this.Observer = wrapSubscriberComponent(ChatRoom, {
       messages: messagesWithIdentity,
       presence: presence,
       connected: observablesClient.connected,
