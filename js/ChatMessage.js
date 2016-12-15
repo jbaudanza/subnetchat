@@ -7,7 +7,7 @@ class Linkify extends React.Component {
   render() {
     const parts = linkify(this.props.text).map(function([text, href], i) {
       if (href)
-        return <a href={href} key={i}>{text}</a>
+        return <a href={href} target="_blank" key={i}>{text}</a>
       else
         return <span key={i}>{text}</span>
     });
