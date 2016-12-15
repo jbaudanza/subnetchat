@@ -177,6 +177,7 @@ class ChatApp extends React.Component {
       observablesClient.observable('chat-messages')
           .map(batch => batch.map(flattenMessage))
           .scan((list, e) => list.concat(e), [])
+          .startWith([])
           .map(list => extendWithHelperBot(list, channelNameFromAddress(ipAddress)))
     ))
 
