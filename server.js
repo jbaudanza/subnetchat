@@ -30,6 +30,7 @@ const projections = require('./projections');
 projections.run(database, loggerSubject);
 
 
+// TODO: This same function exists in RxRemote. Should we DRY this up somehow?
 function addressForSocket(socket) {
   return (
     socket.upgradeReq.headers['x-forwarded-for'] ||
