@@ -3348,9 +3348,9 @@ rxjs@^5.0.0, rxjs@5.0.1:
   dependencies:
     symbol-observable "^1.0.1"
 
-rxremote:
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/rxremote/-/rxremote-0.0.8.tgz#f53d28b9874d6b8bfa97b1ad5d3b91b589ffc2b3"
+rxremote@0.0.9:
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/rxremote/-/rxremote-0.0.9.tgz#c3dcd5281dfa9481a9de80417a23b80b8bb194ef"
   dependencies:
     babel-polyfill "^6.9.1"
     body-parser "^1.15.2"

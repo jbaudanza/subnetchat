@@ -34,7 +34,7 @@ function addressForSocket(socket) {
   return (
     socket.upgradeReq.headers['x-forwarded-for'] ||
     socket.upgradeReq.connection.remoteAddress
-  );
+  ).split(',')[0];
 }
 
 function keyNameForSocket(prefix, socket) {
