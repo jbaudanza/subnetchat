@@ -2,11 +2,16 @@ const sass = require('node-sass');
 const bourbon = require('node-bourbon');
 const fs = require('fs');
 
+const includePaths = [].concat(
+  bourbon.includePaths,
+  './node_modules/normalize.css/'
+);
+
 function build() {
   return new Promise(function(resolve, reject) {
     sass.render({
       file: 'style.scss',
-      includePaths: bourbon.includePaths
+      includePaths: includePaths
     }, function(err, result) {
       if (err)
         reject(err);

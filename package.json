@@ -28,6 +28,7 @@
     "morgan": "^1.7.0",
     "node-bourbon": "^4.2.8",
     "node-sass": "^3.10.1",
+    "normalize.css": "^5.0.0",
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
     "react-edit-inline": "^1.0.7",
