@@ -138,13 +138,19 @@ observablesServer.events.subscribe(function([event, meta]) {
 });
 
 
-const browserifyOptions = {
-  transform: [['babelify', {presets: ["react", 'es2015'], plugins: ['transform-flow-strip-types']}]]
-};
 
 if (app.settings.env === 'development') {
-  const browserify = require('browserify-middleware');
-  app.get('/chat.js', browserify('./js/index.js', browserifyOptions));
+  const webpack = require('webpack');
+  const compiler = webpack(require('./webpack.config'));
+
+  compiler.watch({}, (err, stats) => {
+    if (err) {
+      console.error(err);
+    } else {
+      logger('Webpack finished');
+    }
+  });
+
   app.get('/style.css', require('./stylesheet').serve);
 }
 

@@ -19,7 +19,6 @@ import ObservablesClient from 'rxremote/observables_client';
 const publishingClient = new PublishingClient();
 const observablesClient = new ObservablesClient();
 
-
 function randomIndex(ceil) {
   return Math.floor(Math.random() * ceil);
 }
