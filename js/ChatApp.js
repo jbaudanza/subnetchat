@@ -138,7 +138,10 @@ class ChatApp extends React.Component {
   constructor(props) {
     super(props);
 
-    bindAll(this, 'onSubmitMessage', 'showOverlay', 'hideOverlay', 'setName', 'setIdentity');
+    bindAll(this,
+        'onSubmitMessage', 'showOverlay', 'hideOverlay', 'setName',
+        'setIdentity', 'onReconnect'
+    );
 
     this.state = {
       showOverlay: false
@@ -152,6 +155,10 @@ class ChatApp extends React.Component {
     Object.assign(localStorage, identity);
 
     this.publishIdentity();
+  }
+
+  onReconnect() {
+    observablesClient.reconnect();
   }
 
   setName(name) {
@@ -236,6 +243,7 @@ class ChatApp extends React.Component {
       onSubmitMessage: this.onSubmitMessage,
       identity: this.state.identity,
       onChangeName: this.showOverlay,
+      onReconnect: this.onReconnect,
       setName: this.setName
     };
 

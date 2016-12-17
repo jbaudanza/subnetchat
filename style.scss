@@ -1,7 +1,8 @@
-$dark:      #2c3e50;
-$darker:    #233140;
-$highlight: #18BC9C;
-$black:     #333;
+$dark:          #2c3e50;
+$darker:        #233140;
+$highlight:     #18BC9C;
+$black:         #333;
+$warning-color: #f05f74;
 
 @import 'normalize';
 @import 'overlay';
@@ -56,6 +57,18 @@ body {
   box-sizing: border-box;
 }
 
+.disconnected-message {
+  border: 1px solid $warning-color;
+  background-color: lighten($warning-color, 15%);
+  padding: 5px 10px;
+  color: white;
+  text-align: center;
+
+  a {
+    color: $warning-color;
+  }
+}
+
 ul.chat-nav li {
   list-style-type: none;
   overflow: hidden;
@@ -101,10 +114,10 @@ header {
 }
 
 .chat-room {
-
   .timestamp {
     font-size: 75%;
   }
+  line-height: 1.25;
 }
 
 .message-composer {

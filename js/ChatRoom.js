@@ -1,4 +1,5 @@
 import React from 'react';
+import classNames from 'classNames';
 
 import MessageComposer from './MessageComposer';
 import MessageList from './MessageList';
@@ -75,9 +76,16 @@ function durationString(duration) {
 function Disconnected(props) {
   const seconds = Math.floor((props.reconnectingAt - props.now) /1000);
 
+  function onClick(event) {
+    event.preventDefault();
+    if (props.onReconnect) {
+      props.onReconnect();
+    }
+  }
+
   return (
-    <div>
-      You are disconnected. Reconnecting in {durationString(seconds)}.
+    <div className='disconnected-message'>
+      You are disconnected. Reconnecting in {durationString(seconds)}. <a href="#" onClick={onClick}>Try now.</a>
     </div>
   );
 }
@@ -123,8 +131,11 @@ class ChatRoom extends React.Component {
   }
 
   render() {
+    let disconnectedOverlay;
     if (!this.props.connected) {
-      return <this.Disconnected reconnectingAt={this.props.reconnectingAt} />;
+      disconnectedOverlay = (
+        <this.Disconnected reconnectingAt={this.props.reconnectingAt} onReconnect={this.props.onReconnect} />
+      );
     }
 
     const style = {
@@ -177,7 +188,10 @@ class ChatRoom extends React.Component {
     const avatar = <Avatar {...this.props.identity} />;
 
     return (
-      <div style={style.pageWrapper}>
+      <div
+          style={style.pageWrapper}
+          className={classNames('page-wrapper', {disconnected: !this.props.connected})}>
+        {disconnectedOverlay}
         <header>
           <a href="https://www.subnetchat.com/" className='logo'>
             subnetchat.com
@@ -228,6 +242,7 @@ ChatRoom.propTypes = {
   connected:        React.PropTypes.bool.isRequired,
   messages:         React.PropTypes.array.isRequired,
   presence:         React.PropTypes.array.isRequired,
+  onReconnect:      React.PropTypes.func.isRequired,
   onSubmitMessage:  React.PropTypes.func.isRequired
 };
 

@@ -4,5 +4,5 @@ chat.js
 style.css
 style.css.map
 .env
-public/client.js
+public/chat.js
 public/style.css

@@ -1,7 +1,7 @@
 module.exports = {
   entry: "./js/index.js",
   output: {
-    filename: './public/client.js'
+    filename: './public/chat.js'
   },
   module: {
     loaders: [

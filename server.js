@@ -147,7 +147,7 @@ if (app.settings.env === 'development') {
     if (err) {
       console.error(err);
     } else {
-      logger('Webpack finished');
+      console.log(stats.toString('minimal'));
     }
   });
 
