@@ -207,6 +207,7 @@ class ChatApp extends React.Component {
       messages: messagesWithIdentity,
       presence: presence,
       connected: observablesClient.connected,
+      connectionState: observablesClient.connectionState,
       reconnectingAt: observablesClient.reconnectingAt,
       channelName: channelName$
     })

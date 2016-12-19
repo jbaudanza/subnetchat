@@ -35,7 +35,7 @@
     "react-edit-inline": "^1.0.7",
     "rxeventstore": "^0.0.15",
     "rxjs": "5.0.1",
-    "rxremote": "0.0.12",
+    "rxremote": "0.0.13",
     "sass": "^0.5.0",
     "utf-8-validate": "^1.2.1"
   },

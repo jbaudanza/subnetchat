@@ -83,11 +83,23 @@ function Disconnected(props) {
     }
   }
 
-  return (
-    <div className='disconnected-message'>
-      You are disconnected. Reconnecting in {durationString(seconds)}. <a href="#" onClick={onClick}>Try now.</a>
-    </div>
-  );
+  if (props.connectionState === 'disconnected') {
+    return (
+      <div className='disconnected-message'>
+        You are disconnected. Reconnecting in {durationString(seconds)}. <a href="#" onClick={onClick}>Try now.</a>
+      </div>
+    );
+  }
+
+  if (props.connectionState === 'connecting') {
+    return (
+        <div className='disconnected-message'>
+          Connecting...
+        </div>
+    );
+  }
+
+  return <div className='disconnected-message'></div>;
 }
 
 
@@ -133,9 +145,10 @@ class ChatRoom extends React.Component {
   render() {
     let disconnectedOverlay;
     if (!this.props.connected) {
-      disconnectedOverlay = (
-        <this.Disconnected reconnectingAt={this.props.reconnectingAt} onReconnect={this.props.onReconnect} />
-      );
+      disconnectedOverlay = <this.Disconnected
+            reconnectingAt={this.props.reconnectingAt}
+            onReconnect={this.props.onReconnect}
+            connectionState={this.props.connectionState} />;
     }
 
     const style = {
@@ -240,6 +253,7 @@ class ChatRoom extends React.Component {
 
 ChatRoom.propTypes = {
   connected:        React.PropTypes.bool.isRequired,
+  connectionState:  React.PropTypes.string.isRequired,
   messages:         React.PropTypes.array.isRequired,
   presence:         React.PropTypes.array.isRequired,
   onReconnect:      React.PropTypes.func.isRequired,
