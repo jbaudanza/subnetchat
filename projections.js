@@ -148,10 +148,10 @@ function resumeChannelStatsByMessages(driver, cursor) {
 
         forEach(countBy(batch.value, 'aggregateRoot'), function(count, key) {
           ops.push(['hincrby', 'chat-message-counts', key, count]);
+          ops.push(['sadd', 'channel-names', key]);
         });
 
         batch.value.forEach(function(event) {
-          ops.push(['sadd', 'channel-names', event.aggregateRoot]);
           ops.push(['hset', 'last-message', event.aggregateRoot, JSON.stringify(event)]);
         });
 
@@ -220,3 +220,24 @@ export function presenceForChatRoom(channelName) {
     }
   ).switchMap(identity).map(uniq);
 }
+
+export const channelStats = Rx.Observable.merge(
+  redis.channel('chat-message-counts'),
+  redis.channel('channel-created-at')
+).switchMap(() => {
+  return Promise.all([
+    redis.client.smembers('channel-names'),
+    redis.client.hgetall('chat-message-counts'),
+    redis.client.hgetall('channel-created-at'),
+    redis.client.hgetall('chat-message-counts'),
+    redis.client.hgetall('last-message'),
+  ]).then((results) => (
+    results[0].map((channelName) => ({
+      name: channelName,
+      count: results[1][channelName],
+      createdAt: parseInt(results[2][channelName]),
+      messageCount: results[3][channelName],
+      lastMessage: JSON.parse(results[4][channelName]).value.body
+    }))
+  ))
+});

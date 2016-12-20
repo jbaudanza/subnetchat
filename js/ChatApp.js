@@ -1,6 +1,11 @@
 import React from 'react'
 import {bindAll, first} from 'lodash';
 import Rx from 'rxjs';
+import uuid from 'node-uuid';
+
+import PublishingClient from 'rxremote/lib/publishing_client';
+import ObservablesClient from 'rxremote/observables_client';
+
 
 require('whatwg-fetch');
 
@@ -10,10 +15,7 @@ import * as words from './words';
 import channelNameFromAddress from './channelName';
 import IdentitySelector from './IdentitySelector'
 import Overlay from './Overlay';
-import uuid from 'node-uuid';
-
-import PublishingClient from 'rxremote/lib/publishing_client';
-import ObservablesClient from 'rxremote/observables_client';
+import bindComponentToObservables from './bindComponentToObservables';
 
 
 const publishingClient = new PublishingClient();
@@ -50,35 +52,6 @@ function getIdentity() {
     colorIndex: parseInt(getFromLocalstorage('colorIndex', () => randomIndex(8))),
     iconIndex: parseInt(getFromLocalstorage('iconIndex', () => randomIndex(8)))
   };
-}
-
-function wrapSubscriberComponent(Component, observables) {
-  return class ReactObserver extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = {};
-    }
-
-    componentWillMount() {
-      this.unsubs = [];
-      Object.keys(observables).forEach((key) => {
-        this.unsubs.push(
-          observables[key].subscribe((v) => this.setState({[key]: v}))
-        );
-      });
-
-    }
-
-    componentWillUnmount() {
-      this.unsubs.forEach(function(sub) {
-        sub.unsubscribe();
-      })
-    }
-
-    render() {
-      return <Component {...this.state} {...this.props} />;
-    }
-  }
 }
 
 
@@ -203,7 +176,7 @@ class ChatApp extends React.Component {
 
     const channelName$ = ipAddress$.map(channelNameFromAddress);
 
-    this.Observer = wrapSubscriberComponent(ChatRoom, {
+    this.Observer = bindComponentToObservables(ChatRoom, {
       messages: messagesWithIdentity,
       presence: presence,
       connected: observablesClient.connected,

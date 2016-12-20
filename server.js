@@ -76,6 +76,11 @@ const observables = {
     return Rx.Observable.of(addressForSocket(socket))
         .concat(Rx.Observable.never())
         .map(value => ({cursor: 0, value: value}))
+  },
+
+  "channel-stats"(cursor, socket) {
+    return projections.channelStats
+        .map(value => ({cursor: 0, value: value}));
   }
 };
 
