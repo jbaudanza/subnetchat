@@ -1,5 +1,5 @@
 import Rx from 'rxjs';
-import {flatten, mapValues, identity, uniq} from 'lodash';
+import {flatten, mapValues, identity, uniq, countBy, forEach, groupBy} from 'lodash';
 
 import RedisDatabase from 'rxeventstore/redis';
 
@@ -125,10 +125,49 @@ function resumeConnectionEvents(driver, cursor) {
     });
 }
 
+function resumeChannelStatsByIdentities(driver, cursor) {
+  return driver.observable('chat-identities', {cursor: cursor, includeMetadata: ['aggregateRoot', 'timestamp']})
+      .map(function(batch) {
+        const ops = [];
+
+        forEach(groupBy(batch.value, 'aggregateRoot'), function(events, key) {
+          ops.push(['hsetnx', 'channel-created-at', key, events[0].timestamp.getTime()]);
+        });
+
+        return {
+          cursor: batch.cursor,
+          value: ops
+        };
+      });
+}
+
+function resumeChannelStatsByMessages(driver, cursor) {
+  return driver.observable('chat-messages', {cursor: cursor, includeMetadata: 'aggregateRoot'})
+      .map(function(batch) {
+        const ops = [];
+
+        forEach(countBy(batch.value, 'aggregateRoot'), function(count, key) {
+          ops.push(['hincrby', 'chat-message-counts', key, count]);
+        });
+
+        batch.value.forEach(function(event) {
+          ops.push(['sadd', 'channel-names', event.aggregateRoot]);
+          ops.push(['hset', 'last-message', event.aggregateRoot, JSON.stringify(event)]);
+        });
+
+        return {
+          cursor: batch.cursor,
+          value: ops
+        };
+      });
+}
+
 export function run(driver, logger) {
   redis.runProjection('process-ids', resumeProcessEvents.bind(null, driver), logger);
   redis.runProjection('session-ids', resumeConnectionEvents.bind(null, driver), logger);
   redis.runProjection('chat-identities', resumeChatIdentityEvents.bind(null, driver), logger);
+  redis.runProjection('channel-stats-by-messages', resumeChannelStatsByMessages.bind(null, driver), logger);
+  redis.runProjection('channel-stats-by-identities', resumeChannelStatsByIdentities.bind(null, driver), logger);
 }
 
 
@@ -174,7 +213,6 @@ export function presenceForChatRoom(channelName) {
     redis.channel(key),
     function(sessionIds) {
       if (sessionIds.length === 0) {
-        console.warn(key, "sessionId list is empty.")
         return [];
       } else {
         return redis.clients.global.hmget(key, ...sessionIds);
