@@ -12,7 +12,6 @@ const _ = require('lodash');
 const PgDatabase = require('rxeventstore/pg');
 const {batchedScan} = require('rxeventstore/lib/batches');
 
-const {sessionsOnline} = require('./sessions_online');
 const processLifecycle = require('./process_lifecycle');
 
 const ObservablesServer = require('rxremote/observables_server');
@@ -80,6 +79,11 @@ const observables = {
 
   "channel-stats"(cursor, socket) {
     return projections.channelStats
+        .map(value => ({cursor: 0, value: value}));
+  },
+
+  "session-stats"(cursor, socket) {
+    return projections.sessionStats
         .map(value => ({cursor: 0, value: value}));
   }
 };

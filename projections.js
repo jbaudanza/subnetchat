@@ -1,5 +1,5 @@
 import Rx from 'rxjs';
-import {flatten, mapValues, identity, uniq, countBy, forEach, groupBy} from 'lodash';
+import {flatten, mapValues, identity, uniq, countBy, forEach, groupBy, get} from 'lodash';
 
 import RedisDatabase from 'rxeventstore/redis';
 
@@ -71,8 +71,8 @@ function resumeProcessEvents(driver, cursor) {
           case 'heartbeat':
             ops.push(
               ['zadd', 'process-ids', event.timestamp.getTime(), event.processId],
-              ['expire', keyForSessionsSet(event.processId), EXPIRE_AFTER_SECONDS]
             );
+            ops.push(...cmdsToExpireProcess(event.processId));
             break;
           case 'shutdown':
             ops.push(['zrem', 'process-ids', event.processId]);
@@ -91,11 +91,20 @@ function keyForSessionsSet(processId) {
   return `process:${processId}:sessions`;
 }
 
+function cmdsToExpireProcess(processId) {
+  const prefix = `process:${processId}`;
+  return [
+    ['expire', prefix + ":sessions", EXPIRE_AFTER_SECONDS],
+    ['expire', prefix + ":sessions-ip", EXPIRE_AFTER_SECONDS],
+    ['expire', prefix + ":sessions-timestamps", EXPIRE_AFTER_SECONDS],
+  ];
+}
+
 function resumeConnectionEvents(driver, cursor) {
   return driver
     .observable('connection-events', {
       cursor: cursor,
-      includeMetadata: ['processId', 'sessionId'],
+      includeMetadata: ['processId', 'sessionId', 'timestamp', 'ipAddress'],
       filters: filters
     }).map(function(batch) {
       const ops = [];
@@ -108,11 +117,17 @@ function resumeConnectionEvents(driver, cursor) {
             case 'connection-open':
               ops.push(
                   ['sadd', key, event.sessionId],
-                  ['expire', key, EXPIRE_AFTER_SECONDS]
+                  ['hsetnx', `process:${event.processId}:sessions-timestamp`, event.sessionId, event.timestamp.getTime()],
+                  ['hset', `process:${event.processId}:sessions-ip`, event.sessionId, event.ipAddress],
               );
+              ops.push(...cmdsToExpireProcess(event.processId));
               break;
             case 'connection-closed':
-              ops.push(['srem', key, event.sessionId]);
+              ops.push(
+                ['srem', key, event.sessionId],
+                ['hdel', `process:${event.processId}:sessions-timestamp`, event.sessionId],
+                ['hdel', `process:${event.processId}:sessions-ip`, event.sessionId]
+              );
               break;
           }
         }
@@ -172,22 +187,34 @@ export function run(driver, logger) {
 
 
 function getProcessesOnline() {
-  return redis.clients.global.zrange('process-ids', 0, -1);
+  return redis.client.zrange('process-ids', 0, -1);
 }
 
 
 export const processesOnline = redis.channel('process-ids').switchMap(function() {
-  redis.clients.global.zremrangebyscore('process-ids', '-inf', earliestTimetamp());
+  redis.client.zremrangebyscore('process-ids', '-inf', earliestTimetamp());
   return getProcessesOnline();
 });
 
-
-export const sessionsOnline = processesOnline.switchMap(function(processIds) {
+export const sessionStats = processesOnline.switchMap(function(processIds) {
   if (processIds.length > 0) {
     return Rx.Observable.combineLatest(
       processIds.map(function(processId) {
-        const key = keyForSessionsSet(processId);
-        return redis.channel(key).switchMap(() => redis.clients.global.smembers(key))
+        const keyPrefix = `process:${processId}`;
+
+        return redis.channel(keyPrefix + ':sessions').switchMap(function() {
+          return Promise.all([
+            redis.client.smembers(keyPrefix + ':sessions'),
+            redis.client.hgetall(keyPrefix + ':sessions-ip'),
+            redis.client.hgetall(keyPrefix + ':sessions-timestamp')
+          ]).then((results) => (
+            results[0].map((sessionId) => ({
+              sessionId: sessionId,
+              ipAddress: results[1][sessionId],
+              timestamp: parseInt(results[2][sessionId])
+            }))
+          ))
+        })
       })
     ).map(flatten)
   } else {
@@ -195,11 +222,12 @@ export const sessionsOnline = processesOnline.switchMap(function(processIds) {
   }
 });
 
+export const sessionsOnline = sessionStats.map((list) => list.map(o => o.sessionId));
 
 export function identitiesForChatRoom(channelName) {
   const key = 'chat-identities:' + channelName;
   return redis.channel(key).switchMap(function() {
-    return redis.clients.global
+    return redis.client
         .hgetall(key)
         .then((obj) => mapValues(obj, JSON.parse));
   });
@@ -215,7 +243,7 @@ export function presenceForChatRoom(channelName) {
       if (sessionIds.length === 0) {
         return [];
       } else {
-        return redis.clients.global.hmget(key, ...sessionIds);
+        return redis.client.hmget(key, ...sessionIds);
       }
     }
   ).switchMap(identity).map(uniq);
@@ -237,7 +265,7 @@ export const channelStats = Rx.Observable.merge(
       count: results[1][channelName],
       createdAt: parseInt(results[2][channelName]),
       messageCount: results[3][channelName],
-      lastMessage: JSON.parse(results[4][channelName]).value.body
+      lastMessage: get(JSON.parse(results[4][channelName]), 'value.body')
     }))
   ))
 });

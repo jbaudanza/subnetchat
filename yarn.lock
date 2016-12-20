@@ -2891,7 +2891,7 @@ node-sass:
     request "^2.61.0"
     sass-graph "^2.1.1"
 
-node-uuid@^1.4.7, node-uuid@~1.4.7:
+node-uuid@~1.4.7:
   version "1.4.7"
   resolved "https://registry.yarnpkg.com/node-uuid/-/node-uuid-1.4.7.tgz#6da5a17668c4b3dd59623bda11cf7fa4c1f60a6f"
 
@@ -3529,17 +3529,17 @@ ripemd160@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/ripemd160/-/ripemd160-1.0.1.tgz#93a4bbd4942bc574b69a8fa57c71de10ecca7d6e"
 
-rxeventstore:
-  version "0.0.15"
-  resolved "https://registry.yarnpkg.com/rxeventstore/-/rxeventstore-0.0.15.tgz#85e94e5f4d4a0c3a4a60985b4fe5fadb73fc210e"
+rxeventstore@0.0.16:
+  version "0.0.16"
+  resolved "https://registry.yarnpkg.com/rxeventstore/-/rxeventstore-0.0.16.tgz#1b03288282dc19a4ce36bc16daf1e33c462ab6a3"
   dependencies:
     babel-polyfill "^6.9.1"
     generic-pool "^3.1.1"
-    node-uuid "^1.4.7"
     pg "^6.1.0"
     pg-pool "^1.5.0"
     redis "^2.6.3"
     rxjs "^5.0.0"
+    uuid "^3.0.0"
 
 rxjs@^5.0.0, rxjs@5.0.1:
   version "5.0.1"
