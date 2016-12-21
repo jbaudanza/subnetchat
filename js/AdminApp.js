@@ -60,8 +60,8 @@ class SessionStatsTable extends React.Component {
           this.props.sessionStats.map((stats, i) => (
             <tr key={i}>
               <td>{stats.sessionId}</td>
-              <td>{stats.ipAddress}</td>
               <td>{stats.timestamp}</td>
+              <td>{stats.ipAddress}</td>
               <td>{stats.lastMessage}</td>
               <td>{stats.identity}</td>
               <td>{stats.messageCount}</td>
