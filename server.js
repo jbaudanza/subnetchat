@@ -144,6 +144,13 @@ const observablesServer = new ObservablesServer(server, observables);
 observablesServer.log.subscribe(logger);
 observablesServer.events.subscribe(function([event, meta]) {
   database.insertEvent('connection-events', event, meta);
+
+  // This is a bit of a hack to keep the postgres database from filling up with
+  // connection events that we don't need. A better solution would be to store
+  // these events in kafka or a flat file or something cheaper.
+  database.pool.query(
+    "DELETE FROM events WHERE key='connection-events' AND timestamp < (NOW() AT TIME ZONE 'utc' - INTERVAL '1 hour')"
+  );
 });
 
 
