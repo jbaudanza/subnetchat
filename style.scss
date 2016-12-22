@@ -122,7 +122,9 @@ header {
 
 .message-composer {
   input[type=submit] {
-    @include buttonize(#D8D8D8);
+    @include buttonize($highlight);
+    font-weight: normal;
+    border-radius: 3px;
     height: 20px;
     line-height: 20px;
   }

@@ -235,7 +235,7 @@ class ChatRoom extends React.Component {
                 currentIdentityId={this.props.identity.identityId}
                 setName={this.props.setName}
                 style={{flex: 1}} />
-            <div style={{height: '57px'}}>
+            <div style={{height: '57px', textAlign: 'center'}}>
               <Link className='change-name-button' onClick={this.props.onChangeName}>
                 Change your name
               </Link>
