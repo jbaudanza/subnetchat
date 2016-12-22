@@ -15,8 +15,8 @@ https://www.postgresql.org/download/
 ## Setup schema
 
     curl https://raw.githubusercontent.com/jbaudanza/rxeventstore/master/schema.sql > schema.sql
-    createdb observables_development
-    psql observables_development
+    createdb subnetchat_development
+    psql subnetchat_development
     \i schema.sql
 
 ## Run
