@@ -5,7 +5,7 @@ function Avatar(props) {
   const iconId = (props.iconId || iconIds[props.iconIndex]);
   return (
     <div className='avatar' style={{backgroundColor: colors[props.colorIndex]}}>
-      <Icon iconId={iconId} color='white' />
+      <Icon iconId={iconId} size="33px" color='white' style={{margin: 1}} />
     </div>
   );
 }
@@ -13,7 +13,7 @@ function Avatar(props) {
 // Props: {id, color}
 export function Icon(props) {
   return (
-    <svg width="31px" height="31px" version="1.1" style={{margin: 1}} fill={props.color} stroke={props.color}>
+    <svg width={props.size} height={props.size} style={props.style} version="1.1" fill={props.color} stroke={props.color}>
       <use xlinkHref={props.iconId} />
     </svg>
   );
