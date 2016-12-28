@@ -168,6 +168,7 @@ function resumeChannelStatsByMessages(driver, cursor) {
 
         batch.value.forEach(function(event) {
           ops.push(['hset', 'last-message', event.aggregateRoot, JSON.stringify(event)]);
+          ops.push(['hset', 'last-message-at', event.aggregateRoot, event.timestamp.getTime()]);
         });
 
         return {
@@ -259,13 +260,15 @@ export const channelStats = Rx.Observable.merge(
     redis.client.hgetall('channel-created-at'),
     redis.client.hgetall('chat-message-counts'),
     redis.client.hgetall('last-message'),
+    redis.client.hgetall('last-message-at')
   ]).then((results) => (
     results[0].map((channelName) => ({
       name: channelName,
       count: results[1][channelName],
       createdAt: parseInt(results[2][channelName]),
       messageCount: results[3][channelName],
-      lastMessage: get(JSON.parse(results[4][channelName]), 'value.body')
+      lastMessage: get(JSON.parse(results[4][channelName]), 'value.body'),
+      lastMessageAt: parseInt(results[5][channelName])
     }))
   ))
 });

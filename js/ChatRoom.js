@@ -6,6 +6,7 @@ import MessageList from './MessageList';
 import FontAwesome from './FontAwesome';
 import Avatar from './Avatar';
 import Link from './Link';
+import bindComponentToInterval from './bindComponentToInterval';
 import InlineEdit from 'react-edit-inline';
 
 
@@ -103,34 +104,6 @@ function Disconnected(props) {
 }
 
 
-function createTickingComponent(Component, interval) {
-  return class TickingComponent extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = {};
-    }
-
-    componentWillMount() {
-      this.tick();
-      this.timerId = setInterval(this.tick.bind(this), interval);
-    }
-
-    componentWillUnmount() {
-      clearInterval(this.timerId);
-      delete this.timerId;
-    }
-
-    tick() {
-      this.setState({now: new Date()});
-    }
-
-    render() {
-      return <Component now={this.state.now} {...this.props} />;
-    }
-  };
-}
-
-
 class ChatRoom extends React.Component {
   constructor(props) {
     super(props);
@@ -138,8 +111,8 @@ class ChatRoom extends React.Component {
   }
 
   componentWillMount() {
-    this.MessageList = createTickingComponent(MessageList, 30000);
-    this.Disconnected = createTickingComponent(Disconnected, 1000);
+    this.MessageList = bindComponentToInterval(MessageList, 30000);
+    this.Disconnected = bindComponentToInterval(Disconnected, 1000);
   }
 
   render() {
