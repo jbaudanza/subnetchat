@@ -49,6 +49,9 @@ body {
 
 .change-room-button {
   @include buttonize($highlight);
+  position: absolute;
+  right: 10px;
+  top: -5px;
 }
 
 .join-button {
