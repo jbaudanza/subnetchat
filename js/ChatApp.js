@@ -146,6 +146,22 @@ const rooms = [
 
 import ip from 'ip-address';
 
+const ipv6Descriptions = [
+    "Everyone in the world",
+    "In a massive subnet",
+    "In a huge subnet",
+    "In a smaller subnet",
+    "In your immediate subnet",
+    "Only your IP"
+];
+
+const ipv4Descriptions = [
+  "Everyone in the world",
+  "In your class A subnet",
+  "In your class B subnet",
+  "In your class C subnet",
+  "Only your IP"
+];
 
 function makeRoomList(addressString) {
   let addr;
@@ -159,14 +175,18 @@ function makeRoomList(addressString) {
     return times(5, (i) => join(addr.parsedAddress.slice(0, i*multiplier).concat(fill(Array(addr.parsedAddress.length - i*multiplier), '*'))));
   }
 
+  function mix(roomNames, descriptions) {
+    return roomNames.map((name, i) => ({name: name, description: descriptions[i], messages: 1, online: 1}))
+  }
+
   addr = new ip.Address6(addressString);
   if (addr.valid) {
-    return chomp(addr, ':');
+    return mix(chomp(addr, ':'), ipv6Descriptions);
   }
 
   addr = new ip.Address4(addressString);
   if (addr.valid) {
-    return chomp(addr, '.');
+    return mix(chomp(addr, '.'), ipv4Descriptions);
   }
 }
 
@@ -311,7 +331,7 @@ class ChatApp extends React.Component {
         overlay = (
           <Overlay onClose={this.hideOverlay}>
             <RoomSelector
-                rooms={makeRoomList(this.state.ipInfo.ip).map((ip) => ({name: ip, messages: 1, online: 1, description: 'foo'}))}
+                rooms={makeRoomList(this.state.ipInfo.ip)}
                 ipAddress={this.state.ipInfo.ip}
             />
 
