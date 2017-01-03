@@ -1,5 +1,5 @@
 import React from 'react'
-import {bindAll, first} from 'lodash';
+import {bindAll, first, times, fill} from 'lodash';
 import Rx from 'rxjs';
 import uuid from 'node-uuid';
 
@@ -14,7 +14,9 @@ import SvgAssets from './SvgAssets'
 import * as words from './words';
 import channelNameFromAddress from './channelName';
 import IdentitySelector from './IdentitySelector'
+import RoomSelector from './RoomSelector'
 import Overlay from './Overlay';
+
 import bindComponentToObservables from './bindComponentToObservables';
 
 
@@ -107,17 +109,78 @@ function extendWithHelperBot(list, channelName) {
   }].concat(list);
 }
 
+
+const rooms = [
+  {
+    name: '*',
+    messages: 100,
+    online: 2,
+    description: 'Entire Internet'
+  },
+  {
+    name: '192.*.*.*',
+    messages: 20,
+    online: 4,
+    description: 'Your Class A Subnet'
+  },
+  {
+    name: '192.168.*.*',
+    messages: 20,
+    online: 4,
+    description: 'Your Class B Subnet'
+  },
+  {
+    name: '192.168.1.*',
+    messages: 20,
+    online: 4,
+    description: 'Your Class C Subnet'
+  },
+  {
+    name: '192.168.1.50',
+    messages: 20,
+    online: 4,
+    description: 'Your IP Address'
+  }
+];
+
+
+import ip from 'ip-address';
+
+
+function makeRoomList(addressString) {
+  let addr;
+
+  function chomp(addr, delim) {
+    function join(list) {
+      return list.join(delim)
+    }
+
+    const multiplier = addr.parsedAddress.length / 4;
+    return times(5, (i) => join(addr.parsedAddress.slice(0, i*multiplier).concat(fill(Array(addr.parsedAddress.length - i*multiplier), '*'))));
+  }
+
+  addr = new ip.Address6(addressString);
+  if (addr.valid) {
+    return chomp(addr, ':');
+  }
+
+  addr = new ip.Address4(addressString);
+  if (addr.valid) {
+    return chomp(addr, '.');
+  }
+}
+
 class ChatApp extends React.Component {
   constructor(props) {
     super(props);
 
     bindAll(this,
-        'onSubmitMessage', 'showOverlay', 'hideOverlay', 'setName',
-        'setIdentity', 'onReconnect'
+        'onSubmitMessage','hideOverlay', 'setName', 'setIdentity',
+        'onReconnect', 'onChangeName', 'onChangeRoom'
     );
 
     this.state = {
-      showOverlay: false
+      showOverlay: null
     };
   }
 
@@ -204,8 +267,12 @@ class ChatApp extends React.Component {
     });
   }
 
-  showOverlay() {
-    this.setState({showOverlay: true});
+  onChangeName() {
+    this.setState({showOverlay: 'change-identity'});
+  }
+
+  onChangeRoom() {
+    this.setState({showOverlay: 'change-room'});
   }
 
   hideOverlay() {
@@ -216,7 +283,8 @@ class ChatApp extends React.Component {
     const extraProps = {
       onSubmitMessage: this.onSubmitMessage,
       identity: this.state.identity,
-      onChangeName: this.showOverlay,
+      onChangeName: this.onChangeName,
+      onChangeRoom: this.onChangeRoom,
       onReconnect: this.onReconnect,
       setName: this.setName
     };
@@ -228,15 +296,27 @@ class ChatApp extends React.Component {
     }
 
     let overlay;
-    if (this.state.showOverlay) {
-      overlay = (
-        <Overlay onClose={this.hideOverlay}>
-          <IdentitySelector
-              {...this.state.identity}
-              onClose={this.hideOverlay}
-              onSubmit={this.setIdentity} />
-        </Overlay>
-      );
+    switch (this.state.showOverlay) {
+      case 'change-identity':
+        overlay = (
+          <Overlay onClose={this.hideOverlay}>
+            <IdentitySelector
+                {...this.state.identity}
+                onClose={this.hideOverlay}
+                onSubmit={this.setIdentity} />
+          </Overlay>
+        );
+        break;
+      case 'change-room':
+        overlay = (
+          <Overlay onClose={this.hideOverlay}>
+            <RoomSelector
+                rooms={makeRoomList(this.state.ipInfo.ip).map((ip) => ({name: ip, messages: 1, online: 1, description: 'foo'}))}
+                ipAddress={this.state.ipInfo.ip}
+            />
+
+          </Overlay>
+        );
     }
 
     return (

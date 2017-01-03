@@ -200,6 +200,9 @@ class ChatRoom extends React.Component {
             <span className='channel-location'>
               <FontAwesome icon='map-marker' /> {this.props.channelLocation}
             </span>
+            <Link className='change-room-button' onClick={this.props.onChangeRoom}>
+              Change room
+            </Link>
           </div>
         </div>
         <div className='chat-room' style={style.gridContainer}>
@@ -230,7 +233,9 @@ ChatRoom.propTypes = {
   messages:         React.PropTypes.array.isRequired,
   presence:         React.PropTypes.array.isRequired,
   onReconnect:      React.PropTypes.func.isRequired,
-  onSubmitMessage:  React.PropTypes.func.isRequired
+  onSubmitMessage:  React.PropTypes.func.isRequired,
+  onChangeName:     React.PropTypes.func.isRequired,
+  onChangeRoom:     React.PropTypes.func.isRequired
 };
 
 export default ChatRoom;

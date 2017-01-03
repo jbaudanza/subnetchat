@@ -47,6 +47,18 @@ body {
   @include buttonize($highlight);
 }
 
+.change-room-button {
+  @include buttonize($highlight);
+}
+
+.join-button {
+  @include buttonize($highlight);
+  font-weight: normal;
+  border-radius: 3px;
+  height: 20px;
+  line-height: 20px;
+}
+
 .avatar {
   color: white;
   text-align: center;
@@ -226,4 +238,43 @@ header {
       @include buttonize($highlight);
     }
   }
+}
+
+.room-selector {
+  .header {
+    padding-bottom: 10px;
+  }
+
+  em {
+    font-weight: bold;
+    font-style: normal;
+  }
+
+  th, td {
+    text-align: left;
+  }
+
+  td:nth-child(2), td:nth-child(3),
+  th:nth-child(2), th:nth-child(3) {
+    text-align: center;
+  }
+
+  td:nth-child(1) {
+    width: 20%;
+  }
+  td:nth-child(2) {
+    width: 20%;
+  }
+  td:nth-child(3) {
+    width: 20%;
+  }
+  td:nth-child(4) {
+    width: 20%;
+  }
+  td:nth-child(5) {
+    width: 20%;
+  }
+
+
+
 }
