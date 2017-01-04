@@ -1,7 +1,10 @@
 import React from 'react'
-import Rx from 'rxjs';
 
 import {bindAll} from 'lodash';
+
+import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/startWith';
 
 import ObservablesClient from 'rxremote/observables_client';
 import bindComponentToObservables from './bindComponentToObservables';

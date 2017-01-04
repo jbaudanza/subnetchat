@@ -192,7 +192,7 @@ function getProcessesOnline() {
 }
 
 
-export const processesOnline = redis.channel('process-ids').switchMap(function() {
+export const processesOnline = redis.notifier.channel('process-ids').switchMap(function() {
   redis.client.zremrangebyscore('process-ids', '-inf', earliestTimetamp());
   return getProcessesOnline();
 });
@@ -203,7 +203,7 @@ export const sessionStats = processesOnline.switchMap(function(processIds) {
       processIds.map(function(processId) {
         const keyPrefix = `process:${processId}`;
 
-        return redis.channel(keyPrefix + ':sessions').switchMap(function() {
+        return redis.notifier.channel(keyPrefix + ':sessions').switchMap(function() {
           return Promise.all([
             redis.client.smembers(keyPrefix + ':sessions'),
             redis.client.hgetall(keyPrefix + ':sessions-ip'),
@@ -227,7 +227,7 @@ export const sessionsOnline = sessionStats.map((list) => list.map(o => o.session
 
 export function identitiesForChatRoom(channelName) {
   const key = 'chat-identities:' + channelName;
-  return redis.channel(key).switchMap(function() {
+  return redis.notifier.channel(key).switchMap(function() {
     return redis.client
         .hgetall(key)
         .then((obj) => mapValues(obj, JSON.parse));
@@ -239,7 +239,7 @@ export function presenceForChatRoom(channelName) {
 
   return Rx.Observable.combineLatest(
     sessionsOnline,
-    redis.channel(key),
+    redis.notifier.channel(key),
     function(sessionIds) {
       if (sessionIds.length === 0) {
         return [];
@@ -251,8 +251,8 @@ export function presenceForChatRoom(channelName) {
 }
 
 export const channelStats = Rx.Observable.merge(
-  redis.channel('chat-message-counts'),
-  redis.channel('channel-created-at')
+  redis.notifier.channel('chat-message-counts'),
+  redis.notifier.channel('channel-created-at')
 ).switchMap(() => {
   return Promise.all([
     redis.client.smembers('channel-names'),

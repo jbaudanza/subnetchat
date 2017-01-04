@@ -46,7 +46,7 @@ function keyNameForIp(prefix, ipAddress) {
 }
 
 const observables = {
-  "chat-messages"(cursor, socket) {
+  "chat-messages"(cursor, params, socket) {
     const aggregateRoot = channelName(addressForSocket(socket));
 
     return database
@@ -57,7 +57,7 @@ const observables = {
     });
   },
 
-  "presence"(cursor, socket) {
+  "presence"(cursor, params, socket) {
     const aggregateRoot = channelName(addressForSocket(socket));
 
     return projections
@@ -65,24 +65,24 @@ const observables = {
         .map(value => ({cursor: 0, value: value}))
   },
 
-  "identities"(cursor, socket) {
+  "identities"(cursor, params, socket) {
     return projections
         .identitiesForChatRoom(channelName(addressForSocket(socket)))
         .map(value => ({cursor: 0, value: value}));
   },
 
-  "ip-address"(cursor, socket) {
+  "ip-address"(cursor, params, socket) {
     return Rx.Observable.of(addressForSocket(socket))
         .concat(Rx.Observable.never())
         .map(value => ({cursor: 0, value: value}))
   },
 
-  "channel-stats"(cursor, socket) {
+  "channel-stats"(cursor, params, socket) {
     return projections.channelStats
         .map(value => ({cursor: 0, value: value}));
   },
 
-  "session-stats"(cursor, socket) {
+  "session-stats"(cursor, params, socket) {
     return projections.sessionStats
         .map(value => ({cursor: 0, value: value}));
   }

@@ -1,7 +1,13 @@
 import React from 'react'
 import {bindAll, first, times, fill} from 'lodash';
-import Rx from 'rxjs';
 import uuid from 'node-uuid';
+
+import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/observable/combineLatest';
+import 'rxjs/add/operator/scan';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/switchMap';
+import 'rxjs/add/operator/startWith';
 
 import PublishingClient from 'rxremote/lib/publishing_client';
 import ObservablesClient from 'rxremote/observables_client';
@@ -245,13 +251,13 @@ class ChatApp extends React.Component {
 
     const identities = ipAddress$.switchMap(() => observablesClient.observable('identities'))
 
-    const presence = Rx.Observable.combineLatest(
+    const presence = Observable.combineLatest(
       ipAddress$.switchMap(() => observablesClient.observable('presence')),
       identities,
       (presenceList, identities) => presenceList.map((id) => identities[id]).filter(x => x)
     ).startWith([]);
 
-    const messagesWithIdentity = Rx.Observable.combineLatest(
+    const messagesWithIdentity = Observable.combineLatest(
       messages,
       identities,
       addIdentitiesToMessages
